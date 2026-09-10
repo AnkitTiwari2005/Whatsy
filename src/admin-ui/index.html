@@ -4,200 +4,366 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Whatsy Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#080a0e;--s1:#0d1017;--s2:#141921;--s3:#1c2330;--b:rgba(255,255,255,.07);--b2:rgba(255,255,255,.13);--t1:#f0f4f8;--t2:#8892a4;--t3:#4a5468;--g:#25D366;--gb:rgba(37,211,102,.1);--gg:rgba(37,211,102,.25);--r:#ff4757;--rb:rgba(255,71,87,.1);--y:#ffa502;--rad:10px;--rad-lg:16px}
+:root {
+  --bg:   #060608;
+  --s1:   #0e0e11;
+  --s2:   #17171b;
+  --s3:   #212126;
+  --b:    rgba(255,255,255,.08);
+  --b2:   rgba(255,255,255,.14);
+  --t1:   #ededef;
+  --t2:   #8b8b96;
+  --t3:   #48484f;
+  --g:    #22c55e;
+  --gd:   #16a34a;
+  --gb:   rgba(34,197,94,.08);
+  --gg:   rgba(34,197,94,.22);
+  --r:    #f87171;
+  --rb:   rgba(248,113,113,.08);
+  --y:    #fbbf24;
+  --R:    8px;
+  --RL:   12px;
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;line-height:1.5;font-size:14px}
-#login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(37,211,102,.07),transparent),var(--bg)}
-.lc{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad-lg);padding:40px;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(0,0,0,.6);animation:up .3s ease}
-@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fin{from{opacity:0}to{opacity:1}}
-@keyframes si{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes pr{from{width:100%}to{width:0}}
-@keyframes pls{0%,100%{opacity:1}50%{opacity:.35}}
-.ll{display:flex;align-items:center;gap:12px;margin-bottom:28px}
-.li{width:42px;height:42px;background:var(--g);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0;box-shadow:0 0 18px var(--gg)}
-.lt h1{font-size:1.2rem;font-weight:700;letter-spacing:-.4px}
-.lt p{font-size:.7rem;color:var(--t3);margin-top:1px}
-.pw{position:relative}.pw input{padding-right:40px}
-.pe{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t3);cursor:pointer;padding:4px;font-size:14px;line-height:1}
-.pe:hover{color:var(--t2)}
+html{height:100%}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;line-height:1.5;font-size:14px;-webkit-font-smoothing:antialiased}
+
+/* ─── LOGIN ─────────────────────────────── */
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;
+  background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(34,197,94,.06) 0%,transparent 70%),var(--bg)}
+.lcard{width:100%;max-width:360px;animation:fadeUp .3s ease}
+.l-brand{display:flex;align-items:center;gap:11px;margin-bottom:32px}
+.l-mark{width:36px;height:36px;background:var(--g);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 0 1px rgba(34,197,94,.4),0 4px 16px rgba(34,197,94,.25)}
+.l-mark svg{width:18px;height:18px;stroke:#000;stroke-width:2.5;fill:none}
+.l-brand-text strong{display:block;font-size:.95rem;font-weight:700;letter-spacing:-.3px;color:var(--t1)}
+.l-brand-text span{font-size:.72rem;color:var(--t3)}
+.l-label{font-size:.72rem;font-weight:600;color:var(--t3);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px;display:block}
+.l-input-wrap{position:relative;margin-bottom:8px}
+.l-input-wrap input{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--R);padding:10px 40px 10px 14px;color:var(--t1);font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+.l-input-wrap input:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(34,197,94,.12)}
+.l-input-wrap input::placeholder{color:var(--t3)}
+.l-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t3);cursor:pointer;display:flex;padding:2px}
+.l-eye:hover{color:var(--t2)}
+.l-eye svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+#l-err{min-height:20px;margin-bottom:4px}
+.l-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;background:var(--g);color:#000;border:none;border-radius:var(--R);font-size:.88rem;font-weight:700;font-family:inherit;cursor:pointer;transition:background .15s,box-shadow .15s;margin-top:2px}
+.l-btn:hover{background:#16c653;box-shadow:0 0 0 1px rgba(34,197,94,.4),0 4px 20px rgba(34,197,94,.3)}
+.l-btn svg{width:14px;height:14px;stroke:#000;fill:none;stroke-width:2.5}
+
+/* ─── APP LAYOUT ─────────────────────────── */
 #app{display:flex;min-height:100vh}
-.sb{width:216px;background:var(--s1);border-right:1px solid var(--b);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:10}
-.sbl{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;border-bottom:1px solid var(--b)}
-.sbi{width:30px;height:30px;background:var(--g);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.sbl strong{font-size:.88rem;font-weight:700}
-.sbl small{display:block;font-size:.62rem;color:var(--t3)}
-.sc{display:flex;align-items:center;gap:8px;margin:10px;padding:9px 12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--rad);font-size:.76rem}
-.sci{flex:1;min-width:0}.sci strong{font-weight:600;display:block}.sci small{color:var(--t3);font-size:.66rem}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:background .3s,box-shadow .3s}
-.dot.connected{background:var(--g);box-shadow:0 0 6px var(--g);animation:pls 2s infinite}
-.dot.connecting{background:var(--y);animation:pls .7s infinite}
-.dot.disconnected{background:var(--r)}
-nav{flex:1;overflow-y:auto;padding:4px 0}
-.ni{display:flex;align-items:center;gap:9px;padding:9px 16px;color:var(--t3);cursor:pointer;font-size:.83rem;font-weight:500;border-left:2px solid transparent;transition:all .14s;user-select:none}
+.sb{width:232px;background:var(--s1);border-right:1px solid var(--b);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:10;flex-shrink:0}
+
+/* sidebar logo */
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 16px 16px;border-bottom:1px solid var(--b)}
+.sb-mark{width:28px;height:28px;background:var(--g);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-mark svg{width:14px;height:14px;stroke:#000;fill:none;stroke-width:2.5}
+.sb-logo strong{font-size:.88rem;font-weight:700;letter-spacing:-.3px}
+.sb-logo span{display:block;font-size:.62rem;color:var(--t3);margin-top:0}
+
+/* status chip */
+.sb-status{display:flex;align-items:center;gap:10px;margin:12px 10px 4px;padding:10px 12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)}
+.sb-dot{width:8px;height:8px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:background .3s,box-shadow .3s}
+.sb-dot.connected{background:var(--g);box-shadow:0 0 0 3px rgba(34,197,94,.18);animation:pulse 2.2s ease infinite}
+.sb-dot.connecting{background:var(--y);box-shadow:0 0 0 3px rgba(251,191,36,.18);animation:pulse .9s ease infinite}
+.sb-dot.disconnected{background:var(--r)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sb-status-text strong{display:block;font-size:.78rem;font-weight:600;color:var(--t1)}
+.sb-status-text small{font-size:.68rem;color:var(--t3)}
+
+/* nav */
+nav{flex:1;overflow-y:auto;padding:6px 0}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 16px;color:var(--t3);cursor:pointer;font-size:.82rem;font-weight:500;border-left:2px solid transparent;transition:color .12s,background .12s,border-color .12s;user-select:none;position:relative}
 .ni:hover{color:var(--t2);background:rgba(255,255,255,.03)}
-.ni.on{color:var(--g);border-left-color:var(--g);background:var(--gb)}
-.ni .ic{width:17px;text-align:center;font-size:14px}
-.nb{margin-left:auto;background:var(--g);color:#000;font-size:.6rem;font-weight:800;padding:1px 7px;border-radius:20px}
-.sbf{padding:12px 10px;border-top:1px solid var(--b)}
-.sbv{font-size:.64rem;color:var(--t3);text-align:center;margin-bottom:8px}
-.main{margin-left:216px;flex:1;padding:30px 32px}
-.page{display:none}.page.on{display:block;animation:fin .18s ease}
-.ph{margin-bottom:22px}
-.ph h2{font-size:1.15rem;font-weight:700;letter-spacing:-.3px}
+.ni.on{color:var(--t1);border-left-color:var(--g);background:rgba(34,197,94,.06)}
+.ni .ico{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.ni .ico svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.sb-badge{margin-left:auto;background:var(--g);color:#000;font-size:.6rem;font-weight:800;padding:2px 7px;border-radius:20px;line-height:1.4}
+
+/* sidebar footer */
+.sb-footer{padding:12px 10px;border-top:1px solid var(--b)}
+.sb-ver{font-size:.64rem;color:var(--t3);text-align:center;margin-bottom:8px}
+.sb-out{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:8px;background:transparent;border:1px solid var(--b);border-radius:var(--R);color:var(--t3);font-size:.78rem;font-weight:500;font-family:inherit;cursor:pointer;transition:all .14s}
+.sb-out:hover{color:var(--r);border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.05)}
+.sb-out svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* main */
+.main{margin-left:232px;flex:1;padding:28px 32px;min-width:0;overflow:hidden}
+.page{display:none}.page.on{display:block;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* page header */
+.ph{margin-bottom:24px}
+.ph h2{font-size:1.1rem;font-weight:700;letter-spacing:-.4px;color:var(--t1)}
 .ph p{font-size:.78rem;color:var(--t3);margin-top:3px}
-.card{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad-lg);padding:20px;margin-bottom:14px}
-.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.ct{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--t3)}
-.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
-.sk{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad-lg);padding:16px 18px;transition:border-color .2s}
+
+/* ─── CARDS ──────────────────────────────── */
+.card{background:var(--s1);border:1px solid var(--b);border-radius:var(--RL);padding:20px;margin-bottom:14px}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.ct{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--t3)}
+
+/* ─── STAT GRID ───────────────────────────── */
+.sg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.sk{background:var(--s1);border:1px solid var(--b);border-radius:var(--RL);padding:18px 20px;min-width:0;transition:border-color .2s}
 .sk:hover{border-color:var(--b2)}
-.skl{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:8px}
-.skv{font-size:1.55rem;font-weight:700;letter-spacing:-1px}
-.skv.g{color:var(--g)}.skv.r{color:var(--r)}
-.sks{font-size:.7rem;color:var(--t3);margin-top:3px}
-.fg{margin-bottom:12px}.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-label{display:block;font-size:.68rem;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-input,select{width:100%;background:var(--s2);border:1px solid rgba(255,255,255,.1);border-radius:var(--rad);padding:8px 12px;color:var(--t1);font-size:.83rem;outline:none;transition:border-color .2s,box-shadow .2s;font-family:inherit}
-input:focus,select:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(37,211,102,.12)}
-input::placeholder{color:var(--t3)}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 15px;border:none;border-radius:var(--rad);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .14s;font-family:inherit;white-space:nowrap}
-.bp{background:var(--g);color:#000}.bp:hover{background:#22c55e;box-shadow:0 0 14px rgba(37,211,102,.35)}
-.bg2{background:transparent;color:var(--t2);border:1px solid var(--b)}.bg2:hover{background:var(--s2);border-color:var(--b2)}
-.bd{background:transparent;color:var(--r);border:1px solid transparent}.bd:hover{background:var(--rb);border-color:rgba(255,71,87,.3)}
-.bs{padding:5px 10px;font-size:.74rem}.bf{width:100%;justify-content:center}.bl{padding:10px 20px;font-size:.88rem}
+.sk-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:12px}
+.sk-val{font-size:1.6rem;font-weight:800;letter-spacing:-1.5px;color:var(--t1)}
+.sk-sub{font-size:.72rem;color:var(--t3);margin-top:5px}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 8px;border-radius:20px;font-size:.78rem;font-weight:600;margin-bottom:4px}
+.status-badge.connected{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.status-badge.connecting{background:rgba(251,191,36,.1);color:var(--y);border:1px solid rgba(251,191,36,.2)}
+.status-badge.disconnected{background:rgba(248,113,113,.1);color:var(--r);border:1px solid rgba(248,113,113,.2)}
+.status-badge .bd{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.status-badge.connected .bd{animation:pulse 2s infinite}
+
+/* ─── FORMS ──────────────────────────────── */
+.fg{margin-bottom:12px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:.68rem;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+input,select{width:100%;background:var(--s2);border:1px solid var(--b);border-radius:var(--R);padding:8px 12px;color:var(--t1);font-size:.84rem;font-family:inherit;outline:none;transition:border-color .18s,box-shadow .18s}
+input:focus,select:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(34,197,94,.1)}
+input::placeholder,select option{color:var(--t3)}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%2348484f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+
+/* ─── BUTTONS ────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:var(--R);font-family:inherit;font-weight:600;cursor:pointer;transition:all .14s;white-space:nowrap;text-decoration:none}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.bp{padding:8px 16px;font-size:.82rem;background:var(--g);color:#000}.bp:hover{background:#16c653;box-shadow:0 4px 16px rgba(34,197,94,.3)}
+.bg{padding:7px 14px;font-size:.8rem;background:transparent;color:var(--t2);border:1px solid var(--b)}.bg:hover{background:var(--s2);border-color:var(--b2);color:var(--t1)}
+.bd2{padding:7px 14px;font-size:.8rem;background:transparent;color:var(--r);border:1px solid transparent}.bd2:hover{background:var(--rb);border-color:rgba(248,113,113,.25)}
+.bs{padding:5px 10px;font-size:.74rem}
+.bf{width:100%}
+.bl{padding:10px 18px;font-size:.88rem}
+
+/* ─── BADGES ─────────────────────────────── */
+.bx{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.bx-sent{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.15)}
+.bx-queued{background:rgba(251,191,36,.1);color:var(--y);border:1px solid rgba(251,191,36,.15)}
+.bx-failed{background:rgba(248,113,113,.1);color:var(--r);border:1px solid rgba(248,113,113,.15)}
+.bx-active{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.15)}
+.bx-inactive{background:rgba(255,255,255,.05);color:var(--t3);border:1px solid var(--b)}
+
+/* ─── TABLE ──────────────────────────────── */
 .tw{overflow-x:auto;margin:0 -20px -20px}
 table{width:100%;border-collapse:collapse}
-thead th{padding:9px 20px;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);border-bottom:1px solid var(--b);text-align:left;white-space:nowrap}
-tbody tr{border-bottom:1px solid var(--b);transition:background .1s}
+thead th{padding:8px 20px;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);border-bottom:1px solid var(--b);text-align:left;white-space:nowrap;background:rgba(255,255,255,.015)}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s}
 tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:rgba(255,255,255,.025)}
-td{padding:10px 20px;font-size:.8rem}
-.bx{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-.bx-sent{background:rgba(37,211,102,.12);color:#4ade80}
-.bx-queued{background:rgba(255,165,2,.12);color:var(--y)}
-.bx-failed{background:rgba(255,71,87,.12);color:#ff6b6b}
-.bx-active{background:rgba(37,211,102,.12);color:#4ade80}
-.bx-inactive{background:rgba(255,255,255,.06);color:var(--t3)}
-.acc{border:1px solid var(--b);border-radius:var(--rad-lg);overflow:hidden;margin-bottom:14px}
-.ach{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;cursor:pointer;background:var(--s1);transition:background .14s;user-select:none}
-.ach:hover{background:var(--s2)}
-.acht{font-size:.85rem;font-weight:600}
-.achi{color:var(--t3);font-size:.72rem;transition:transform .2s}
-.ach.op .achi{transform:rotate(180deg)}
+td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
+
+/* ─── ACCORDION ──────────────────────────── */
+.acc{border:1px solid var(--b);border-radius:var(--RL);overflow:hidden;margin-bottom:16px;background:var(--s1)}
+.ach{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;transition:background .14s;user-select:none}
+.ach:hover{background:rgba(255,255,255,.03)}
+.ach-t{font-size:.84rem;font-weight:600;color:var(--t1)}
+.ach-i{color:var(--t3);transition:transform .2s;display:flex}
+.ach-i svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ach.op .ach-i{transform:rotate(180deg)}
 .acb{display:none;padding:18px;border-top:1px solid var(--b)}.acb.op{display:block}
-.pc2{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad-lg);margin-bottom:10px;overflow:hidden}
-.ph2{display:flex;align-items:flex-start;justify-content:space-between;padding:15px 17px;gap:12px}
-.pnr{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.pn{font-weight:600;font-size:.88rem}
-.pm{font-size:.73rem;color:var(--t3);margin-top:3px}
-.pa{display:flex;gap:6px;flex-shrink:0}
-.pk{border-top:1px solid var(--b);padding:11px 17px;background:var(--s2)}
-.pkl{font-size:.65rem;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
-.kr{display:flex;align-items:center;gap:8px;padding:6px 11px;background:var(--s1);border-radius:var(--rad);border:1px solid var(--b);margin-bottom:5px}
+
+/* ─── PROJECT CARD ───────────────────────── */
+.pcard{background:var(--s1);border:1px solid var(--b);border-radius:var(--RL);margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+.pcard:hover{border-color:var(--b2)}
+.phead{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 18px;gap:12px}
+.pname-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.pname{font-weight:700;font-size:.88rem}
+.pmeta{font-size:.72rem;color:var(--t3);display:flex;align-items:center;gap:5px;margin-top:2px}
+.pacts{display:flex;gap:6px;flex-shrink:0;margin-top:2px}
+.pkeys{border-top:1px solid var(--b);padding:12px 18px;background:rgba(0,0,0,.2)}
+.pkeys-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:8px}
+.kr{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--s2);border-radius:var(--R);border:1px solid var(--b);margin-bottom:6px}
 .kr:last-child{margin-bottom:0}
-.km{font-family:monospace;font-size:.76rem;color:var(--t3);flex:1}
-.kb{font-family:monospace;font-size:.78rem;padding:11px 13px;background:var(--s2);border:1px solid var(--g);border-radius:var(--rad);word-break:break-all;color:var(--g);margin:10px 0}
-.pcode{font-family:monospace;font-size:2.6rem;font-weight:800;letter-spacing:12px;color:var(--g);text-align:center;padding:26px 20px;background:var(--gb);border:2px solid var(--gg);border-radius:var(--rad-lg);margin:14px 0;animation:up .3s ease}
-.steps{display:flex;margin-bottom:22px}
-.step{flex:1;text-align:center;padding:11px 6px;border-bottom:2px solid var(--b);font-size:.75rem;color:var(--t3);transition:all .2s}
-.sn{width:24px;height:24px;border-radius:50%;background:var(--s3);border:1px solid var(--b);display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;margin-bottom:5px;transition:all .2s}
-.step.dn{color:var(--g);border-bottom-color:var(--g)}.step.dn .sn{background:var(--gb);border-color:var(--g);color:var(--g)}
-.step.ac{color:var(--t1);border-bottom-color:var(--g)}.step.ac .sn{background:var(--g);border-color:var(--g);color:#000}
-.tl{padding:2px 0}
-.ti{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--b)}.ti:last-child{border-bottom:none}
-.td3{width:7px;height:7px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.km{font-family:'Courier New',monospace;font-size:.76rem;color:var(--t3);flex:1;letter-spacing:.5px}
+
+/* ─── KEY BOX ────────────────────────────── */
+.kb{font-family:'Courier New',monospace;font-size:.78rem;padding:12px 14px;background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.25);border-radius:var(--R);word-break:break-all;color:#4ade80;margin:10px 0;letter-spacing:.3px}
+
+/* ─── PAIR CODE ──────────────────────────── */
+.pcode{font-family:'Courier New',monospace;font-size:2.8rem;font-weight:800;letter-spacing:14px;color:var(--g);text-align:center;padding:28px 24px;background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.2);border-radius:var(--RL);margin:16px 0;animation:fadeUp .3s ease;text-shadow:0 0 20px rgba(34,197,94,.3)}
+
+/* ─── STEPS ──────────────────────────────── */
+.steps{display:flex;margin-bottom:24px}
+.step{flex:1;text-align:center;padding:12px 8px;border-bottom:2px solid var(--b);font-size:.74rem;color:var(--t3);transition:all .2s}
+.snum{width:26px;height:26px;border-radius:50%;background:var(--s3);border:1px solid var(--b);display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;margin-bottom:6px;transition:all .2s}
+.step.dn{color:var(--g);border-bottom-color:var(--g)}.step.dn .snum{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:var(--g)}
+.step.ac{color:var(--t1);border-bottom-color:var(--g)}.step.ac .snum{background:var(--g);border-color:var(--g);color:#000;font-weight:800}
+
+/* ─── TIMELINE ───────────────────────────── */
+.tl{padding:0}
+.ti{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.ti:last-child{border-bottom:none}
+.tdot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0}
 .tb{flex:1;min-width:0}
-.tm{font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tme{font-size:.7rem;color:var(--t3);margin-top:2px}
-.al{padding:9px 13px;border-radius:var(--rad);font-size:.8rem;margin:8px 0}
-.al-ok{background:var(--gb);border:1px solid rgba(37,211,102,.2);color:#4ade80}
-.al-er{background:var(--rb);border:1px solid rgba(255,71,87,.2);color:#ff6b6b}
-.emp{text-align:center;padding:36px 20px;color:var(--t3)}.empi{font-size:1.8rem;margin-bottom:8px}.emp p{font-size:.8rem}
-.fb{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.tmsg{font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t1)}
+.tmeta{font-size:.71rem;color:var(--t3);margin-top:3px;display:flex;align-items:center;gap:4px}
+
+/* ─── ALERTS (inline) ────────────────────── */
+.al{padding:10px 14px;border-radius:var(--R);font-size:.8rem;margin:8px 0;display:flex;align-items:flex-start;gap:8px}
+.al-ok{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);color:#4ade80}
+.al-er{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.18);color:var(--r)}
+
+/* ─── EMPTY ──────────────────────────────── */
+.emp{text-align:center;padding:40px 20px;color:var(--t3)}
+.emp-ico{font-size:1.6rem;margin-bottom:10px;opacity:.5}
+.emp p{font-size:.8rem}
+
+/* ─── FILTER BAR ─────────────────────────── */
+.fb{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
 .fb input,.fb select{width:auto}
-#toasts{position:fixed;bottom:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:7px}
-.toast{display:flex;align-items:center;gap:9px;padding:10px 15px;border-radius:var(--rad);font-size:.8rem;font-weight:500;max-width:290px;min-width:180px;box-shadow:0 4px 20px rgba(0,0,0,.5);animation:si .22s ease;overflow:hidden;position:relative}
-.toast::after{content:'';position:absolute;bottom:0;left:0;height:2px;background:currentColor;opacity:.35;animation:pr 3.6s linear forwards}
-.t-ok{background:#162318;color:#4ade80;border:1px solid rgba(74,222,128,.18)}
-.t-er{background:#231618;color:#ff6b6b;border:1px solid rgba(255,107,107,.18)}
+
+/* ─── TOAST ──────────────────────────────── */
+#toasts{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:var(--R);font-size:.8rem;font-weight:500;max-width:300px;min-width:200px;pointer-events:auto;box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);animation:slideIn .22s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden}
+@keyframes slideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast::after{content:'';position:absolute;bottom:0;left:0;height:2px;background:currentColor;opacity:.3;animation:progbar 3.6s linear forwards}
+@keyframes progbar{from{width:100%}to{width:0}}
+.t-ok{background:#0d1f14;color:#4ade80;border:1px solid rgba(74,222,128,.15)}
+.t-er{background:#1f0d0d;color:var(--r);border:1px solid rgba(248,113,113,.15)}
 .t-in{background:var(--s2);color:var(--t2);border:1px solid var(--b)}
-#mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:9998;align-items:center;justify-content:center;padding:20px}
+.t-ico{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+
+/* ─── MODAL ──────────────────────────────── */
+#mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:9998;align-items:center;justify-content:center;padding:20px}
 #mo.op{display:flex}
-.mb2{background:var(--s2);border:1px solid var(--b2);border-radius:var(--rad-lg);padding:22px;width:100%;max-width:390px;box-shadow:0 16px 48px rgba(0,0,0,.7);animation:up .2s ease}
-.mt2{font-size:.92rem;font-weight:700;margin-bottom:7px}
-.md{font-size:.8rem;color:var(--t2);margin-bottom:16px}
-.md input{margin-top:10px}
-.mf{display:flex;gap:8px;justify-content:flex-end}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
-.tr2{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mu{color:var(--t3)}.fl{display:flex}.fca{align-items:center}.jsb{justify-content:space-between}
+.mbox{background:var(--s2);border:1px solid var(--b2);border-radius:var(--RL);padding:24px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.8);animation:fadeUp .2s ease}
+.m-title{font-size:.95rem;font-weight:700;letter-spacing:-.2px;margin-bottom:8px}
+.m-body{font-size:.82rem;color:var(--t2);margin-bottom:20px;line-height:1.6}
+.m-body input{margin-top:12px}
+.m-foot{display:flex;gap:8px;justify-content:flex-end}
+
+/* ─── SCROLLBAR ──────────────────────────── */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--s3);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--t3)}
+
+/* ─── UTILS ──────────────────────────────── */
+.tr{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mn{font-family:'Courier New',monospace}
+.mu{color:var(--t3)}
+.fl{display:flex}.fca{align-items:center}.jsb{justify-content:space-between}
+.mt4{margin-top:4px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
+.instr{padding-left:20px;color:var(--t3);font-size:.8rem;line-height:2.2}
+.instr li{padding-left:4px}
 </style>
 </head>
 <body>
+
+<!-- hidden icon templates -->
+<div style="display:none">
+  <svg id="ic-grid" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+  <svg id="ic-phone" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"/></svg>
+  <svg id="ic-folder" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+  <svg id="ic-file" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+  <svg id="ic-logout" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+  <svg id="ic-chat" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <svg id="ic-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+  <svg id="ic-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+  <svg id="ic-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  <svg id="ic-chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+  <svg id="ic-refresh" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+  <svg id="ic-pin" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+  <svg id="ic-key" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+  <svg id="ic-copy" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+  <svg id="ic-send" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+  <svg id="ic-check" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  <svg id="ic-x" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  <svg id="ic-info" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+</div>
+
+<!-- TOASTS -->
 <div id="toasts"></div>
+
+<!-- MODAL -->
 <div id="mo">
- <div class="mb2">
-  <div class="mt2" id="m-ti"></div>
-  <div class="md" id="m-bd"></div>
-  <div class="mf">
-   <button class="btn bg2 bs" id="m-no">Cancel</button>
+ <div class="mbox">
+  <div class="m-title" id="m-ti"></div>
+  <div class="m-body" id="m-bd"></div>
+  <div class="m-foot">
+   <button class="btn bg bs" id="m-no">Cancel</button>
    <button class="btn bs" id="m-ok">Confirm</button>
   </div>
  </div>
 </div>
+
+<!-- LOGIN -->
 <div id="login">
- <div class="lc">
-  <div class="ll">
-   <div class="li">&#x1F4AC;</div>
-   <div class="lt"><h1>Whatsy</h1><p>Admin Panel</p></div>
+ <div class="lcard">
+  <div class="l-brand">
+   <div class="l-mark"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+   <div class="l-brand-text"><strong>Whatsy</strong><span>Admin Panel</span></div>
   </div>
-  <div class="fg">
-   <label>Admin Key</label>
-   <div class="pw">
-    <input type="password" id="lk" placeholder="Paste your admin key" autocomplete="current-password">
-    <button class="pe" onclick="tpw()" title="Show/hide">&#x1F441;</button>
-   </div>
+  <label class="l-label" for="lk">Admin Key</label>
+  <div class="l-input-wrap">
+   <input type="password" id="lk" placeholder="Paste your admin key" autocomplete="current-password">
+   <button class="l-eye" id="l-eye-btn" onclick="tpw()" title="Toggle visibility">
+    <svg id="l-eye-svg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+   </button>
   </div>
-  <div id="lerr"></div>
-  <button class="btn bp bf bl" onclick="doLogin()" style="margin-top:10px">Sign in &rarr;</button>
+  <div id="l-err"></div>
+  <button class="l-btn" onclick="doLogin()">
+   <span>Sign in</span>
+   <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </button>
  </div>
 </div>
+
+<!-- APP -->
 <div id="app" style="display:none">
  <aside class="sb">
-  <div class="sbl">
-   <div class="sbi">&#x1F4AC;</div>
-   <div><strong>Whatsy</strong><small>Admin Panel</small></div>
+  <div class="sb-logo">
+   <div class="sb-mark"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+   <div><strong style="font-size:.85rem;font-weight:700;letter-spacing:-.3px">Whatsy</strong><span style="display:block;font-size:.62rem;color:var(--t3)">Admin Panel</span></div>
   </div>
-  <div class="sc">
-   <div class="dot" id="sb-dot"></div>
-   <div class="sci">
-    <strong id="sb-l">&mdash;</strong>
-    <small id="sb-s"></small>
+  <div class="sb-status">
+   <div class="sb-dot" id="sb-dot"></div>
+   <div class="sb-status-text">
+    <strong id="sb-l">Connecting</strong>
+    <small id="sb-s">Initialising&hellip;</small>
    </div>
   </div>
   <nav>
-   <div class="ni on" id="ni-ov" onclick="gp('ov')"><span class="ic">&#x1F4CA;</span> Overview</div>
-   <div class="ni" id="ni-pr" onclick="gp('pr')"><span class="ic">&#x1F4F1;</span> Pair WhatsApp</div>
-   <div class="ni" id="ni-pj" onclick="gp('pj')"><span class="ic">&#x1F5C2;</span> Projects</div>
-   <div class="ni" id="ni-lg" onclick="gp('lg')"><span class="ic">&#x1F4CB;</span> Logs<span class="nb" id="qb" style="display:none">0</span></div>
+   <div class="ni on" id="ni-ov" onclick="gp('ov')"><span class="ico"></span><span>Overview</span></div>
+   <div class="ni" id="ni-pr" onclick="gp('pr')"><span class="ico"></span><span>Pair WhatsApp</span></div>
+   <div class="ni" id="ni-pj" onclick="gp('pj')"><span class="ico"></span><span>Projects</span></div>
+   <div class="ni" id="ni-lg" onclick="gp('lg')"><span class="ico"></span><span>Message Logs</span><span class="sb-badge" id="qb" style="display:none">0</span></div>
   </nav>
-  <div class="sbf">
-   <div class="sbv">Whatsy v1.0</div>
-   <button class="btn bg2 bf bs" onclick="doLogout()">Sign out</button>
+  <div class="sb-footer">
+   <div class="sb-ver">Whatsy v1.0</div>
+   <button class="sb-out" onclick="doLogout()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></button>
   </div>
  </aside>
+
  <main class="main">
+
+  <!-- OVERVIEW -->
   <div class="page on" id="pg-ov">
-   <div class="ph"><h2>Overview</h2><p>Real-time status and recent activity</p></div>
+   <div class="ph"><h2>Overview</h2><p>Real-time server status and recent activity</p></div>
    <div class="sg">
-    <div class="sk"><div class="skl">WhatsApp</div><div class="skv" id="s-wa">&mdash;</div><div class="sks" id="s-ws"></div></div>
-    <div class="sk"><div class="skl">Queue</div><div class="skv" id="s-q">&mdash;</div><div class="sks">messages pending</div></div>
-    <div class="sk"><div class="skl">Uptime</div><div class="skv" id="s-up">&mdash;</div><div class="sks">since last restart</div></div>
+    <div class="sk">
+     <div class="sk-label">WhatsApp Status</div>
+     <div id="s-wa-badge"></div>
+     <div class="sk-sub" id="s-wa-sub">Checking&hellip;</div>
+    </div>
+    <div class="sk">
+     <div class="sk-label">Queue</div>
+     <div class="sk-val" id="s-q">&mdash;</div>
+     <div class="sk-sub">messages pending</div>
+    </div>
+    <div class="sk">
+     <div class="sk-label">Uptime</div>
+     <div class="sk-val" id="s-up">&mdash;</div>
+     <div class="sk-sub">since last restart</div>
+    </div>
    </div>
    <div class="card">
-    <div class="ch"><span class="ct">Recent Messages</span><button class="btn bg2 bs" onclick="loadRec()">&#x21BB; Refresh</button></div>
+    <div class="ch">
+     <span class="ct">Recent Messages</span>
+     <button class="btn bg bs" onclick="loadRec()" id="rec-refresh-btn"></button>
+    </div>
     <div id="rec"><div class="emp"><p>Loading&hellip;</p></div></div>
    </div>
    <div class="card">
@@ -207,277 +373,475 @@ td{padding:10px 20px;font-size:.8rem}
      <div class="fg"><label>Project API Key</label><input type="text" id="qt-k" placeholder="Paste API key"></div>
     </div>
     <div class="fg"><label>Message</label><input type="text" id="qt-m" placeholder="Hello from Whatsy!"></div>
-    <button class="btn bp" onclick="sendTest()">Send Test &rarr;</button>
+    <button class="btn bp" id="qt-btn" onclick="sendTest()"></button>
     <div id="qt-r"></div>
    </div>
   </div>
+
+  <!-- PAIR -->
   <div class="page" id="pg-pr">
-   <div class="ph"><h2>Pair WhatsApp</h2><p>Link a WhatsApp account to send messages</p></div>
+   <div class="ph"><h2>Pair WhatsApp</h2><p>Link a WhatsApp number to send messages</p></div>
    <div class="steps">
-    <div class="step ac" id="st1"><div class="sn">1</div><div>Phone Number</div></div>
-    <div class="step" id="st2"><div class="sn">2</div><div>Enter Code</div></div>
-    <div class="step" id="st3"><div class="sn">3</div><div>Connected</div></div>
+    <div class="step ac" id="st1"><div class="snum">1</div><div>Phone Number</div></div>
+    <div class="step" id="st2"><div class="snum">2</div><div>Enter Code</div></div>
+    <div class="step" id="st3"><div class="snum">3</div><div>Connected</div></div>
    </div>
    <div class="card">
-    <div class="fg"><label>Phone Number</label><input type="tel" id="pp" placeholder="919876543210 — country code + digits, no + or spaces"></div>
-    <button class="btn bp bl" onclick="doPair()">Request Pairing Code</button>
-    <div id="pr" style="margin-top:14px"></div>
+    <div class="fg"><label>Phone Number</label><input type="tel" id="pp" placeholder="919876543210 &mdash; country code + digits, no + or spaces"></div>
+    <button class="btn bp bl" id="pair-btn" onclick="doPair()"></button>
+    <div id="pr" style="margin-top:16px"></div>
    </div>
-   <div class="card" style="background:rgba(37,211,102,.03);border-color:rgba(37,211,102,.15)">
-    <div class="ct" style="margin-bottom:11px">How to pair</div>
-    <ol style="padding-left:20px;color:var(--t3);font-size:.8rem;line-height:2.3">
-     <li>Enter your dedicated WhatsApp number above (country code + digits)</li>
+   <div class="card" style="background:rgba(34,197,94,.025);border-color:rgba(34,197,94,.12)">
+    <div class="ct" style="margin-bottom:12px;color:rgba(34,197,94,.6)">How to pair</div>
+    <ol class="instr">
+     <li>Enter your dedicated WhatsApp number above (country code + digits, no +)</li>
      <li>Open WhatsApp &rarr; Settings &rarr; Linked Devices &rarr; Link a Device</li>
      <li>Tap &ldquo;Link with phone number instead&rdquo;</li>
      <li>Enter the 8-character code shown above</li>
     </ol>
    </div>
   </div>
+
+  <!-- PROJECTS -->
   <div class="page" id="pg-pj">
    <div class="ph"><h2>Projects</h2><p>Manage projects, API keys, and recipients</p></div>
    <div class="acc" id="nacc">
-    <div class="ach" onclick="tacc('nacc')"><span class="acht">+ Create New Project</span><span class="achi">&#x25BE;</span></div>
+    <div class="ach" onclick="tacc('nacc')">
+     <span class="ach-t">Create New Project</span>
+     <span class="ach-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+    </div>
     <div class="acb" id="nacc-b">
      <div class="fg2">
       <div class="fg"><label>Name *</label><input type="text" id="pj-n" placeholder="my-shop"></div>
       <div class="fg"><label>Default Recipient</label><input type="text" id="pj-r" placeholder="+91XXXXXXXXXX"></div>
      </div>
-     <div class="fg"><label>Description</label><input type="text" id="pj-d" placeholder="Optional"></div>
-     <button class="btn bp" onclick="createProj()">Create Project</button>
+     <div class="fg"><label>Description</label><input type="text" id="pj-d" placeholder="Optional description"></div>
+     <button class="btn bp" id="create-proj-btn" onclick="createProj()"></button>
      <div id="pj-res"></div>
     </div>
    </div>
-   <div class="fl fca jsb" style="margin-bottom:11px">
+   <div class="fl fca jsb" style="margin-bottom:12px">
     <span class="ct">Your Projects</span>
-    <button class="btn bg2 bs" onclick="loadProjs()">&#x21BB; Refresh</button>
+    <button class="btn bg bs" id="refresh-projs-btn" onclick="loadProjs()"></button>
    </div>
    <div id="pj-list"></div>
   </div>
+
+  <!-- LOGS -->
   <div class="page" id="pg-lg">
    <div class="ph"><h2>Message Logs</h2><p>Full history of every message sent through Whatsy</p></div>
    <div class="card">
     <div class="fb">
-     <input type="text" id="lf-p" placeholder="Filter by project&hellip;" style="max-width:165px">
-     <select id="lf-s" style="max-width:150px">
+     <input type="text" id="lf-p" placeholder="Filter by project&hellip;" style="max-width:160px">
+     <select id="lf-s" style="max-width:145px">
       <option value="">All statuses</option>
       <option value="queued">Queued</option>
       <option value="sent">Sent</option>
       <option value="failed">Failed</option>
      </select>
-     <button class="btn bp bs" onclick="loadLogs()">Search</button>
-     <button class="btn bg2 bs" onclick="clrL()">Clear</button>
+     <button class="btn bp bs" id="search-btn" onclick="loadLogs()"></button>
+     <button class="btn bg bs" onclick="clrL()">Clear</button>
     </div>
-    <div class="tw"><div id="lg-w"><div class="emp"><div class="empi">&#x1F50D;</div><p>Click Search to load logs</p></div></div></div>
+    <div class="tw"><div id="lg-w"><div class="emp"><div class="emp-ico">&#128269;</div><p>Click Search to load logs</p></div></div></div>
    </div>
   </div>
+
  </main>
 </div>
+
 <script>
-var K=localStorage.getItem('wk')||'';
-document.getElementById('lk').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
-function tpw(){var i=document.getElementById('lk');i.type=i.type==='password'?'text':'password';}
-async function doLogin(){
-var k=document.getElementById('lk').value.trim();if(!k)return;
-try{
-var r=await fetch('/admin/projects',{headers:{'X-Admin-Key':k}});
-if(r.status===401){document.getElementById('lerr').innerHTML='<div class="al al-er">Invalid admin key</div>';return;}
-K=k;localStorage.setItem('wk',k);boot();
-}catch(e){document.getElementById('lerr').innerHTML='<div class="al al-er">Cannot reach server</div>';}
+// ─── ICON HELPER ─────────────────────────────────────────────────────────────
+function svgOf(id) {
+  var el = document.getElementById(id);
+  return el ? el.outerHTML.replace(' id="'+id+'"','').replace('<svg ','<svg stroke="currentColor" ') : '';
 }
-function doLogout(){
-localStorage.removeItem('wk');K='';
-document.getElementById('app').style.display='none';
-document.getElementById('login').style.display='flex';
-document.getElementById('lk').value='';document.getElementById('lerr').innerHTML='';
+
+// Inject nav icons after DOM is ready
+(function(){
+  var items = [
+    ['ni-ov', 'ic-grid'],
+    ['ni-pr', 'ic-phone'],
+    ['ni-pj', 'ic-folder'],
+    ['ni-lg', 'ic-file'],
+  ];
+  items.forEach(function(pair){
+    var ni = document.getElementById(pair[0]);
+    if(ni) ni.querySelector('.ico').innerHTML = svgOf(pair[1]);
+  });
+
+  // Inject button icons
+  function setBtn(id, svgId, label) {
+    var el = document.getElementById(id);
+    if(el) el.innerHTML = svgOf(svgId) + '<span>' + label + '</span>';
+  }
+  setBtn('rec-refresh-btn', 'ic-refresh', 'Refresh');
+  setBtn('qt-btn', 'ic-send', 'Send Test');
+  setBtn('pair-btn', 'ic-phone', 'Request Pairing Code');
+  setBtn('create-proj-btn', 'ic-key', 'Create Project');
+  setBtn('refresh-projs-btn', 'ic-refresh', 'Refresh');
+  setBtn('search-btn', 'ic-file', 'Search');
+})();
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+var K = localStorage.getItem('wk') || '';
+var eyeOn = true;
+
+document.getElementById('lk').addEventListener('keydown', function(e){if(e.key==='Enter')doLogin();});
+
+function tpw() {
+  var i = document.getElementById('lk');
+  eyeOn = !eyeOn;
+  i.type = eyeOn ? 'password' : 'text';
+  document.getElementById('l-eye-svg').innerHTML = eyeOn
+    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+    : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
 }
-function boot(){
-document.getElementById('login').style.display='none';
-document.getElementById('app').style.display='flex';
-pollS();loadRec();setInterval(pollS,5000);
+
+async function doLogin() {
+  var k = document.getElementById('lk').value.trim();
+  if(!k) return;
+  var btn = document.querySelector('.l-btn');
+  btn.style.opacity = '.6';
+  btn.style.pointerEvents = 'none';
+  try {
+    var r = await fetch('/admin/projects', {headers:{'X-Admin-Key':k}});
+    if(r.status === 401) {
+      document.getElementById('l-err').innerHTML = '<div class="al al-er" style="margin-top:8px">'+svgOf('ic-x')+'<span>Invalid admin key</span></div>';
+      btn.style.opacity=''; btn.style.pointerEvents='';
+      return;
+    }
+    K = k; localStorage.setItem('wk', k); boot();
+  } catch(e) {
+    document.getElementById('l-err').innerHTML = '<div class="al al-er" style="margin-top:8px">'+svgOf('ic-x')+'<span>Cannot reach server</span></div>';
+    btn.style.opacity=''; btn.style.pointerEvents='';
+  }
 }
-if(K){fetch('/admin/projects',{headers:{'X-Admin-Key':K}}).then(function(r){if(r.ok)boot();else{localStorage.removeItem('wk');K='';}}).catch(function(){});}
-async function ap(m,u,b){
-var o={method:m,headers:{'X-Admin-Key':K,'Content-Type':'application/json'}};
-if(b)o.body=JSON.stringify(b);
-var r=await fetch(u,o);var d=await r.json();
-if(!r.ok)throw new Error(d.error||'Error');
-return d;
+
+function doLogout() {
+  localStorage.removeItem('wk'); K = '';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+  document.getElementById('lk').value = '';
+  document.getElementById('l-err').innerHTML = '';
 }
-function toast(msg,tp){
-tp=tp||'in';
-var ic={ok:'&#x2713;',er:'&#x2715;',in:'&#x2139;'};
-var t=document.createElement('div');t.className='toast t-'+tp;
-t.innerHTML=(ic[tp]||'&#x2139;')+' '+esc(msg);
-document.getElementById('toasts').appendChild(t);
-setTimeout(function(){t.style.cssText='opacity:0;transform:translateX(110%);transition:.25s';setTimeout(function(){t.remove();},250);},3600);
+
+function boot() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  pollS(); loadRec(); setInterval(pollS, 5000);
 }
-var _mr=null;
-function modal(title,body,ok,danger){
-ok=ok||'Confirm';
-document.getElementById('m-ti').textContent=title;
-document.getElementById('m-bd').innerHTML='<span>'+esc(body)+'</span>';
-var b=document.getElementById('m-ok');b.textContent=ok;b.className='btn bs '+(danger?'bd':'bp');
-document.getElementById('mo').classList.add('op');
-return new Promise(function(rs){_mr=rs;});
+
+if(K) {
+  fetch('/admin/projects', {headers:{'X-Admin-Key':K}})
+    .then(function(r){if(r.ok)boot();else{localStorage.removeItem('wk');K='';}})
+    .catch(function(){});
 }
-function modalIn(title,lbl,ph){
-document.getElementById('m-ti').textContent=title;
-document.getElementById('m-bd').innerHTML='<span style="color:var(--t2)">'+esc(lbl)+'</span><input type="text" id="m-in" placeholder="'+esc(ph||'')+'" style="margin-top:10px">';
-var b=document.getElementById('m-ok');b.textContent='Confirm';b.className='btn bs bp';
-document.getElementById('mo').classList.add('op');
-setTimeout(function(){var i=document.getElementById('m-in');if(i)i.focus();},60);
-return new Promise(function(rs){_mr=rs;});
+
+// ─── API ──────────────────────────────────────────────────────────────────────
+async function ap(m, u, b) {
+  var o = {method:m, headers:{'X-Admin-Key':K,'Content-Type':'application/json'}};
+  if(b) o.body = JSON.stringify(b);
+  var r = await fetch(u, o); var d = await r.json();
+  if(!r.ok) throw new Error(d.error || 'Request failed');
+  return d;
 }
-document.getElementById('m-ok').addEventListener('click',function(){
-var i=document.getElementById('m-in');var v=i?i.value:true;
-document.getElementById('mo').classList.remove('op');
-if(_mr){_mr(v);_mr=null;}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg, tp) {
+  tp = tp || 'in';
+  var icons = {ok: svgOf('ic-check'), er: svgOf('ic-x'), in: svgOf('ic-info')};
+  var t = document.createElement('div');
+  t.className = 'toast t-' + tp;
+  t.innerHTML = '<span class="t-ico">'+(icons[tp]||icons.in)+'</span><span>'+esc(msg)+'</span>';
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(function(){
+    t.style.cssText = 'transform:translateX(110%);opacity:0;transition:.25s cubic-bezier(.4,0,1,1)';
+    setTimeout(function(){t.remove();}, 260);
+  }, 3700);
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+var _mr = null;
+
+function modal(title, body, okLabel, danger) {
+  okLabel = okLabel || 'Confirm';
+  document.getElementById('m-ti').textContent = title;
+  document.getElementById('m-bd').innerHTML = '<p>'+esc(body)+'</p>';
+  var b = document.getElementById('m-ok');
+  b.textContent = okLabel;
+  b.className = 'btn bs ' + (danger ? 'bd2' : 'bp');
+  document.getElementById('mo').classList.add('op');
+  return new Promise(function(rs){_mr = rs;});
+}
+
+function modalIn(title, lbl, ph) {
+  document.getElementById('m-ti').textContent = title;
+  document.getElementById('m-bd').innerHTML = '<p style="margin-bottom:0">'+esc(lbl)+'</p><input type="text" id="m-in" placeholder="'+esc(ph||'')+'">';
+  var b = document.getElementById('m-ok'); b.textContent = 'Confirm'; b.className = 'btn bs bp';
+  document.getElementById('mo').classList.add('op');
+  setTimeout(function(){var i=document.getElementById('m-in');if(i)i.focus();}, 60);
+  return new Promise(function(rs){_mr = rs;});
+}
+
+document.getElementById('m-ok').addEventListener('click', function(){
+  var i = document.getElementById('m-in'); var v = i ? i.value : true;
+  document.getElementById('mo').classList.remove('op');
+  if(_mr){_mr(v); _mr=null;}
 });
-document.getElementById('m-no').addEventListener('click',function(){
-document.getElementById('mo').classList.remove('op');
-if(_mr){_mr(null);_mr=null;}
+document.getElementById('m-no').addEventListener('click', function(){
+  document.getElementById('mo').classList.remove('op');
+  if(_mr){_mr(null); _mr=null;}
 });
-document.getElementById('mo').addEventListener('click',function(e){if(e.target===this)document.getElementById('m-no').click();});
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function ru(iso){var s=Math.floor((Date.now()-new Date(iso))/1000);if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return new Date(iso).toLocaleDateString();}
-function fu(s){if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m '+s%60+'s';return Math.floor(s/3600)+'h '+Math.floor(s%3600/60)+'m';}
-function gp(n){
-document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
-document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('on');});
-document.getElementById('pg-'+n).classList.add('on');
-document.getElementById('ni-'+n).classList.add('on');
-if(n==='pj')loadProjs();if(n==='ov')loadRec();if(n==='lg')loadLogs();
+document.getElementById('mo').addEventListener('click', function(e){
+  if(e.target===this) document.getElementById('m-no').click();
+});
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-async function pollS(){
-try{
-var d=await fetch('/api/v1/status').then(function(r){return r.json();});
-var wa=d.whatsapp;
-document.getElementById('sb-dot').className='dot '+wa;
-document.getElementById('sb-l').textContent=wa.charAt(0).toUpperCase()+wa.slice(1);
-document.getElementById('sb-s').textContent='Up '+fu(d.uptime_seconds);
-var el=document.getElementById('s-wa');el.textContent=wa;el.className='skv '+(wa==='connected'?'g':'r');
-document.getElementById('s-ws').textContent=wa==='connected'?'Session active':'Reconnecting...';
-var qv=d.queue_length;document.getElementById('s-q').textContent=qv;
-document.getElementById('s-q').className='skv '+(qv>0?'g':'');
-document.getElementById('s-up').textContent=fu(d.uptime_seconds);
-var qb=document.getElementById('qb');if(qv>0){qb.textContent=qv;qb.style.display='';}else{qb.style.display='none';}
-}catch(e){}
+function ru(iso) {
+  var s = Math.floor((Date.now()-new Date(iso))/1000);
+  if(s<60)return s+'s ago'; if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago'; return new Date(iso).toLocaleDateString();
 }
-async function doPair(){
-var phone=document.getElementById('pp').value.trim();
-var el=document.getElementById('pr');
-if(!phone){toast('Enter a phone number','er');return;}
-el.innerHTML='<div class="al al-ok">Requesting code&hellip;</div>';setSt(2);
-try{
-var d=await ap('POST','/admin/pair',{phone_number:phone});
-el.innerHTML='<div class="pcode">'+esc(d.pairing_code)+'</div>'+
-'<ol style="padding-left:20px;color:var(--t3);font-size:.8rem;line-height:2.3">'+
-d.instructions.map(function(i){return '<li>'+esc(i)+'</li>';}).join('')+'</ol>';
-}catch(err){el.innerHTML='<div class="al al-er">'+esc(err.message)+'</div>';setSt(1);}
+function fu(s) {
+  if(s<60)return s+'s'; if(s<3600)return Math.floor(s/60)+'m';
+  return Math.floor(s/3600)+'h '+Math.floor((s%3600)/60)+'m';
+}
+function cpb(text, btn) {
+  navigator.clipboard.writeText(text).then(function(){
+    var o = btn.innerHTML;
+    btn.innerHTML = svgOf('ic-check')+'<span>Copied!</span>';
+    btn.style.color = 'var(--g)';
+    setTimeout(function(){btn.innerHTML=o; btn.style.color='';}, 2000);
+  });
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+function gp(n) {
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('on');});
+  document.getElementById('pg-'+n).classList.add('on');
+  document.getElementById('ni-'+n).classList.add('on');
+  if(n==='pj') loadProjs();
+  if(n==='ov') loadRec();
+  if(n==='lg') loadLogs();
+}
+
+// ─── STATUS POLL ──────────────────────────────────────────────────────────────
+async function pollS() {
+  try {
+    var d = await fetch('/api/v1/status').then(function(r){return r.json();});
+    var wa = d.whatsapp;
+    var label = wa.charAt(0).toUpperCase()+wa.slice(1);
+    document.getElementById('sb-dot').className = 'sb-dot ' + wa;
+    document.getElementById('sb-l').textContent = label;
+    document.getElementById('sb-s').textContent = 'Up ' + fu(d.uptime_seconds);
+    document.getElementById('s-wa-badge').innerHTML = '<div class="status-badge '+wa+'"><div class="bd"></div><span>'+label+'</span></div>';
+    document.getElementById('s-wa-sub').textContent = wa==='connected' ? 'Session active' : 'Attempting reconnect';
+    var qv = d.queue_length;
+    document.getElementById('s-q').textContent = qv;
+    document.getElementById('s-up').textContent = fu(d.uptime_seconds);
+    var qb = document.getElementById('qb');
+    if(qv>0){qb.textContent=qv;qb.style.display='';}else{qb.style.display='none';}
+  } catch(e){}
+}
+
+// ─── PAIR ─────────────────────────────────────────────────────────────────────
+async function doPair() {
+  var phone = document.getElementById('pp').value.trim();
+  var el = document.getElementById('pr');
+  if(!phone){toast('Enter a phone number','er');return;}
+  el.innerHTML = '<div class="al al-ok">'+svgOf('ic-info')+'<span>Requesting pairing code&hellip;</span></div>';
+  setSt(2);
+  try {
+    var d = await ap('POST','/admin/pair',{phone_number:phone});
+    el.innerHTML = '<div class="pcode">'+esc(d.pairing_code)+'</div>'+
+      '<ol class="instr" style="margin-top:8px">'+
+      d.instructions.map(function(i){return '<li>'+esc(i)+'</li>';}).join('')+'</ol>';
+    setSt(2);
+  } catch(err) {
+    el.innerHTML = '<div class="al al-er">'+svgOf('ic-x')+'<span>'+esc(err.message)+'</span></div>';
+    setSt(1);
+  }
 }
 function setSt(n){for(var i=1;i<=3;i++){var s=document.getElementById('st'+i);s.className='step'+(i<n?' dn':i===n?' ac':'');}}
-async function loadProjs(){
-var el=document.getElementById('pj-list');
-el.innerHTML='<div class="emp"><p>Loading&hellip;</p></div>';
-try{
-var list=await ap('GET','/admin/projects');
-if(!list.length){el.innerHTML='<div class="emp"><div class="empi">&#x1F5C2;</div><p>No projects yet. Create one above.</p></div>';return;}
-el.innerHTML=list.map(function(p){
-var ak=p.api_keys.filter(function(k){return k.active;});
-return '<div class="pc2">'+
-'<div class="ph2"><div>'+
-'<div class="pnr"><span class="pn">'+esc(p.name)+'</span><span class="bx bx-'+(p.active?'active':'inactive')+'">'+(p.active?'active':'inactive')+'</span></div>'+
-(p.description?'<div class="pm">'+esc(p.description)+'</div>':'')+
-(p.default_recipient?'<div class="pm">&#x1F4CD; '+esc(p.default_recipient)+'</div>':'')+
-'</div><div class="pa">'+
-'<button class="btn bg2 bs" onclick="addKey('+p.id+')">+ Key</button>'+
-'<button class="btn '+(p.active?'bd':'bg2')+' bs" onclick="togProj('+p.id+','+p.active+')">'+(p.active?'Deactivate':'Activate')+'</button>'+
-'</div></div>'+
-(ak.length?'<div class="pk"><div class="pkl">API Keys ('+ak.length+')</div>'+
-ak.map(function(k){return '<div class="kr"><span class="km">'+esc(k.key_prefix)+'&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;'+(k.label?' ('+esc(k.label)+')':'')+'</span><button class="btn bd bs" onclick="revKey('+p.id+','+k.id+')">Revoke</button></div>';}).join('')+'</div>':'')+
-'</div>';
-}).join('');
-}catch(err){el.innerHTML='<div class="al al-er">'+esc(err.message)+'</div>';}
+
+// ─── PROJECTS ─────────────────────────────────────────────────────────────────
+async function loadProjs() {
+  var el = document.getElementById('pj-list');
+  el.innerHTML = '<div class="emp"><p>Loading&hellip;</p></div>';
+  try {
+    var list = await ap('GET','/admin/projects');
+    if(!list.length){
+      el.innerHTML = '<div class="emp"><div class="emp-ico">&#128194;</div><p>No projects yet. Create one above.</p></div>';
+      return;
+    }
+    el.innerHTML = list.map(function(p){
+      var ak = p.api_keys.filter(function(k){return k.active;});
+      var addKeyHTML = '<button class="btn bg bs" style="gap:5px" onclick="addKey('+p.id+')">'+svgOf('ic-key')+'<span>+ Key</span></button>';
+      var toggleHTML = p.active
+        ? '<button class="btn bd2 bs" onclick="togProj('+p.id+',true)">Deactivate</button>'
+        : '<button class="btn bg bs" onclick="togProj('+p.id+',false)">Activate</button>';
+      return '<div class="pcard">'+
+        '<div class="phead">'+
+        '<div style="min-width:0">'+
+        '<div class="pname-row"><span class="pname">'+esc(p.name)+'</span><span class="bx bx-'+(p.active?'active':'inactive')+'">'+(p.active?'active':'inactive')+'</span></div>'+
+        (p.description?'<div class="pmeta">'+esc(p.description)+'</div>':'')+
+        (p.default_recipient?'<div class="pmeta">'+svgOf('ic-pin')+'<span>'+esc(p.default_recipient)+'</span></div>':'')+
+        '</div>'+
+        '<div class="pacts">'+addKeyHTML+toggleHTML+'</div>'+
+        '</div>'+
+        (ak.length?'<div class="pkeys"><div class="pkeys-lbl">API Keys ('+ak.length+')</div>'+
+        ak.map(function(k){
+          return '<div class="kr">'+
+            '<span class="km">'+esc(k.key_prefix)+'&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;'+(k.label?' &middot; '+esc(k.label):'')+'</span>'+
+            '<button class="btn bd2 bs" onclick="revKey('+p.id+','+k.id+')">Revoke</button>'+
+            '</div>';
+        }).join('')+'</div>':'')+
+        '</div>';
+    }).join('');
+  } catch(err){
+    el.innerHTML = '<div class="al al-er">'+svgOf('ic-x')+'<span>'+esc(err.message)+'</span></div>';
+  }
 }
-async function createProj(){
-var n=document.getElementById('pj-n').value.trim();
-var d2=document.getElementById('pj-d').value.trim();
-var r=document.getElementById('pj-r').value.trim();
-if(!n){toast('Project name is required','er');return;}
-try{
-var data=await ap('POST','/admin/projects',{name:n,description:d2,default_recipient:r});
-document.getElementById('pj-res').innerHTML='<div class="al al-ok" style="margin-top:12px">Project <strong>'+esc(data.name)+'</strong> created! Save the key — shown once only.</div><div class="kb">'+esc(data.api_key)+'</div><button class="btn bg2 bs" onclick="cpb(this.dataset.k,this)" data-k="'+esc(data.api_key)+'">Copy Key</button>';
-document.getElementById('pj-n').value='';document.getElementById('pj-d').value='';document.getElementById('pj-r').value='';
-loadProjs();toast('Project created','ok');
-}catch(err){document.getElementById('pj-res').innerHTML='<div class="al al-er">'+esc(err.message)+'</div>';}
+
+async function createProj() {
+  var n = document.getElementById('pj-n').value.trim();
+  var desc = document.getElementById('pj-d').value.trim();
+  var r = document.getElementById('pj-r').value.trim();
+  if(!n){toast('Project name is required','er');return;}
+  try {
+    var data = await ap('POST','/admin/projects',{name:n,description:desc,default_recipient:r});
+    document.getElementById('pj-res').innerHTML =
+      '<div class="al al-ok" style="margin-top:14px">'+svgOf('ic-check')+'<span>Project <strong>'+esc(data.name)+'</strong> created. Save the key now &mdash; shown once only.</span></div>'+
+      '<div class="kb">'+esc(data.api_key)+'</div>'+
+      '<button class="btn bg bs" onclick="cpb(this.dataset.k,this)" data-k="'+esc(data.api_key)+'">'+svgOf('ic-copy')+'<span>Copy Key</span></button>';
+    document.getElementById('pj-n').value='';
+    document.getElementById('pj-d').value='';
+    document.getElementById('pj-r').value='';
+    loadProjs(); toast('Project created','ok');
+  } catch(err){
+    document.getElementById('pj-res').innerHTML='<div class="al al-er" style="margin-top:14px">'+svgOf('ic-x')+'<span>'+esc(err.message)+'</span></div>';
+  }
 }
-async function addKey(id){
-var label=await modalIn('New API Key','Label for this key (e.g. production, staging):','production');
-if(label===null)return;
-try{
-var d=await ap('POST','/admin/projects/'+id+'/keys',{label:label});
-document.getElementById('pj-res').innerHTML='<div class="al al-ok" style="margin-top:12px">Key created — save it now, shown once only.</div><div class="kb">'+esc(d.api_key)+'</div><button class="btn bg2 bs" onclick="cpb(this.dataset.k,this)" data-k="'+esc(d.api_key)+'">Copy Key</button>';
-var ab=document.getElementById('nacc-b');ab.classList.add('op');
-document.querySelector('#nacc .ach').classList.add('op');
-loadProjs();toast('Key created','ok');
-}catch(err){toast(err.message,'er');}
+
+async function addKey(id) {
+  var label = await modalIn('New API Key','Label for this key (e.g. production, staging):','production');
+  if(label===null) return;
+  try {
+    var d = await ap('POST','/admin/projects/'+id+'/keys',{label:label});
+    document.getElementById('pj-res').innerHTML =
+      '<div class="al al-ok" style="margin-top:14px">'+svgOf('ic-check')+'<span>Key created. Save it now &mdash; shown once only.</span></div>'+
+      '<div class="kb">'+esc(d.api_key)+'</div>'+
+      '<button class="btn bg bs" onclick="cpb(this.dataset.k,this)" data-k="'+esc(d.api_key)+'">'+svgOf('ic-copy')+'<span>Copy Key</span></button>';
+    var ab = document.getElementById('nacc-b'); ab.classList.add('op');
+    document.querySelector('#nacc .ach').classList.add('op');
+    loadProjs(); toast('Key created','ok');
+  } catch(err){toast(err.message,'er');}
 }
-async function revKey(pid,kid){
-var ok=await modal('Revoke API Key','Any app using this key will immediately get 401 errors. This cannot be undone.','Revoke',true);
-if(!ok)return;
-try{await ap('DELETE','/admin/projects/'+pid+'/keys/'+kid);toast('Key revoked','ok');loadProjs();}catch(err){toast(err.message,'er');}
+
+async function revKey(pid, kid) {
+  var ok = await modal('Revoke API Key','Any app using this key will immediately receive 401 errors. This cannot be undone.','Revoke',true);
+  if(!ok) return;
+  try{await ap('DELETE','/admin/projects/'+pid+'/keys/'+kid);toast('Key revoked','ok');loadProjs();}
+  catch(err){toast(err.message,'er');}
 }
-async function togProj(id,active){
-var ok=await modal((active?'Deactivate':'Activate')+' Project',active?'All API keys for this project will stop working.':'This project will resume accepting messages.',active?'Deactivate':'Activate',active);
-if(!ok)return;
-try{await ap('PATCH','/admin/projects/'+id,{active:!active});toast('Project '+(active?'deactivated':'activated'),'ok');loadProjs();}catch(err){toast(err.message,'er');}
+
+async function togProj(id, active) {
+  var ok = await modal(
+    (active?'Deactivate':'Activate')+' Project',
+    active?'All API keys for this project will stop working immediately.':'This project and its keys will start working again.',
+    active?'Deactivate':'Activate', active
+  );
+  if(!ok) return;
+  try{await ap('PATCH','/admin/projects/'+id,{active:!active});toast('Project '+(active?'deactivated':'activated'),'ok');loadProjs();}
+  catch(err){toast(err.message,'er');}
 }
-async function loadLogs(){
-var proj=document.getElementById('lf-p').value.trim();
-var stat=document.getElementById('lf-s').value;
-var el=document.getElementById('lg-w');
-var params=new URLSearchParams({limit:'100'});
-if(proj)params.set('project',proj);if(stat)params.set('status',stat);
-el.innerHTML='<div class="emp"><p>Loading&hellip;</p></div>';
-try{
-var d=await ap('GET','/admin/messages?'+params.toString());
-if(!d.messages.length){el.innerHTML='<div class="emp"><div class="empi">&#x1F4ED;</div><p>No messages found</p></div>';return;}
-el.innerHTML='<p style="font-size:.68rem;color:var(--t3);margin-bottom:11px;padding:0 20px">Showing '+d.messages.length+' of '+d.total+'</p>'+
-'<table><thead><tr><th>Time</th><th>Project</th><th>Recipient</th><th>Status</th><th>Message</th></tr></thead><tbody>'+
-d.messages.map(function(m){var prev=m.error?'&#x26A0; '+m.error:(m.body||'&mdash;');return '<tr><td style="color:var(--t3);white-space:nowrap">'+esc(ru(m.created_at))+'</td><td><strong>'+esc(m.project_name)+'</strong></td><td style="font-size:.78rem">'+esc(m.recipient)+'</td><td><span class="bx bx-'+m.status+'">'+m.status+'</span></td><td style="max-width:230px" class="tr2 mu" title="'+esc(m.error||m.body||'')+'">'+esc(prev)+'</td></tr>';}).join('')+'</tbody></table>';
-}catch(err){el.innerHTML='<div class="al al-er">'+esc(err.message)+'</div>';}
+
+// ─── LOGS ─────────────────────────────────────────────────────────────────────
+async function loadLogs() {
+  var proj = document.getElementById('lf-p').value.trim();
+  var stat = document.getElementById('lf-s').value;
+  var el = document.getElementById('lg-w');
+  var params = new URLSearchParams({limit:'100'});
+  if(proj) params.set('project',proj);
+  if(stat) params.set('status',stat);
+  el.innerHTML = '<div class="emp"><p>Loading&hellip;</p></div>';
+  try {
+    var d = await ap('GET','/admin/messages?'+params.toString());
+    if(!d.messages.length){
+      el.innerHTML='<div class="emp"><div class="emp-ico">&#128235;</div><p>No messages found</p></div>';
+      return;
+    }
+    el.innerHTML =
+      '<p style="font-size:.68rem;color:var(--t3);padding:0 20px 12px">Showing '+d.messages.length+' of '+d.total+'</p>'+
+      '<table><thead><tr><th>Time</th><th>Project</th><th>Recipient</th><th>Status</th><th>Message</th></tr></thead><tbody>'+
+      d.messages.map(function(m){
+        var prev = m.error ? m.error : (m.body||'');
+        return '<tr>'+
+          '<td class="mu" style="white-space:nowrap;font-size:.76rem">'+esc(ru(m.created_at))+'</td>'+
+          '<td style="font-weight:600">'+esc(m.project_name)+'</td>'+
+          '<td class="mn" style="font-size:.76rem">'+esc(m.recipient)+'</td>'+
+          '<td><span class="bx bx-'+m.status+'">'+m.status+'</span></td>'+
+          '<td class="tr mu" style="max-width:220px" title="'+esc(prev)+'">'+esc(prev)+'</td>'+
+          '</tr>';
+      }).join('')+'</tbody></table>';
+  } catch(err){
+    el.innerHTML='<div class="al al-er">'+svgOf('ic-x')+'<span>'+esc(err.message)+'</span></div>';
+  }
 }
 function clrL(){document.getElementById('lf-p').value='';document.getElementById('lf-s').value='';loadLogs();}
-async function loadRec(){
-var el=document.getElementById('rec');
-try{
-var d=await ap('GET','/admin/messages?limit=7');
-if(!d.messages.length){el.innerHTML='<div class="emp"><div class="empi">&#x1F4ED;</div><p>No messages sent yet</p></div>';return;}
-var clr={sent:'var(--g)',queued:'var(--y)',failed:'var(--r)'};
-el.innerHTML='<div class="tl">'+d.messages.map(function(m){return '<div class="ti"><div class="td3" style="background:'+(clr[m.status]||'var(--t3)')+'"></div><div class="tb"><div class="tm">'+esc(m.body||'(empty)')+'</div><div class="tme">'+esc(m.project_name)+' &rarr; '+esc(m.recipient)+' &middot; '+ru(m.created_at)+'</div></div><span class="bx bx-'+m.status+'">'+m.status+'</span></div>';}).join('')+'</div>';
-}catch(e){el.innerHTML='<div class="emp"><p>Could not load messages</p></div>';}
+
+// ─── RECENT ───────────────────────────────────────────────────────────────────
+async function loadRec() {
+  var el = document.getElementById('rec');
+  try {
+    var d = await ap('GET','/admin/messages?limit=7');
+    if(!d.messages.length){
+      el.innerHTML='<div class="emp"><div class="emp-ico">&#128235;</div><p>No messages sent yet</p></div>';
+      return;
+    }
+    var clr = {sent:'var(--g)',queued:'var(--y)',failed:'var(--r)'};
+    el.innerHTML = '<div class="tl">'+d.messages.map(function(m){
+      return '<div class="ti">'+
+        '<div class="tdot" style="background:'+(clr[m.status]||'var(--t3)')+'"></div>'+
+        '<div class="tb">'+
+        '<div class="tmsg">'+esc(m.body||'(empty)')+'</div>'+
+        '<div class="tmeta"><span>'+esc(m.project_name)+'</span><span>&rarr;</span><span>'+esc(m.recipient)+'</span><span>&middot;</span><span>'+ru(m.created_at)+'</span></div>'+
+        '</div>'+
+        '<span class="bx bx-'+m.status+'">'+m.status+'</span>'+
+        '</div>';
+    }).join('')+'</div>';
+  } catch(e){
+    el.innerHTML='<div class="emp"><p>Could not load messages</p></div>';
+  }
 }
-async function sendTest(){
-var to=document.getElementById('qt-to').value.trim();
-var key=document.getElementById('qt-k').value.trim();
-var msg=document.getElementById('qt-m').value.trim();
-var el=document.getElementById('qt-r');
-if(!to||!key||!msg){toast('Fill in all three fields','er');return;}
-el.innerHTML='<div class="al al-ok" style="margin-top:10px">Sending&hellip;</div>';
-try{
-var r=await fetch('/api/v1/messages',{method:'POST',headers:{'X-Api-Key':key,'Content-Type':'application/json'},body:JSON.stringify({message:msg,recipient:to})});
-var d=await r.json();if(!r.ok)throw new Error(d.error);
-el.innerHTML='<div class="al al-ok" style="margin-top:10px">&#x2713; Queued (id '+d.id+')</div>';
-toast('Message queued','ok');setTimeout(loadRec,2000);
-}catch(err){el.innerHTML='<div class="al al-er" style="margin-top:10px">'+esc(err.message)+'</div>';}
+
+// ─── QUICK TEST ───────────────────────────────────────────────────────────────
+async function sendTest() {
+  var to = document.getElementById('qt-to').value.trim();
+  var key = document.getElementById('qt-k').value.trim();
+  var msg = document.getElementById('qt-m').value.trim();
+  var el = document.getElementById('qt-r');
+  if(!to||!key||!msg){toast('Fill in all three fields','er');return;}
+  el.innerHTML='<div class="al al-ok" style="margin-top:10px">'+svgOf('ic-info')+'<span>Sending&hellip;</span></div>';
+  try {
+    var r = await fetch('/api/v1/messages',{method:'POST',headers:{'X-Api-Key':key,'Content-Type':'application/json'},body:JSON.stringify({message:msg,recipient:to})});
+    var d = await r.json(); if(!r.ok) throw new Error(d.error);
+    el.innerHTML='<div class="al al-ok" style="margin-top:10px">'+svgOf('ic-check')+'<span>Queued (id '+d.id+')</span></div>';
+    toast('Message queued','ok'); setTimeout(loadRec, 2000);
+  } catch(err){
+    el.innerHTML='<div class="al al-er" style="margin-top:10px">'+svgOf('ic-x')+'<span>'+esc(err.message)+'</span></div>';
+  }
 }
-function tacc(id){
-var a=document.getElementById(id);
-var h=a.querySelector('.ach');var b=a.querySelector('.acb');
-h.classList.toggle('op');b.classList.toggle('op');
-}
-function cpb(text,btn){
-navigator.clipboard.writeText(text).then(function(){var o=btn.textContent;btn.textContent='&#x2713; Copied';btn.style.color='var(--g)';setTimeout(function(){btn.textContent=o;btn.style.color='';},2000);});
+
+// ─── ACCORDION ────────────────────────────────────────────────────────────────
+function tacc(id) {
+  var a = document.getElementById(id);
+  var h = a.querySelector('.ach'); var b = a.querySelector('.acb');
+  h.classList.toggle('op'); b.classList.toggle('op');
 }
 </script>
 </body>
