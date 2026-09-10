@@ -1,328 +1,139 @@
-# Whatsy
+﻿# Whatsy
 
-> A self-hosted WhatsApp notification API Ã¢â‚¬â€ one WhatsApp connection, clean REST API, multi-project API key auth.
+A self-hosted WhatsApp notification gateway. Send WhatsApp messages from any app via a simple REST API.
 
-## Table of Contents
-
-1. [Quick Start](#quick-start)
-2. [Initial WhatsApp Setup](#initial-whatsapp-setup)
-3. [Adding a Project](#adding-a-project)
-4. [Sending a Message (API Reference)](#sending-a-message-api-reference)
-5. [Admin API Reference](#admin-api-reference)
-6. [Failure Modes & Recovery](#failure-modes--recovery)
-7. [Deployment on Hostinger](#deployment-on-hostinger)
-8. [Environment Variables](#environment-variables)
+**Live at:** `https://honeydew-butterfly-241889.hostingersite.com`
 
 ---
 
-## Quick Start
+## What it does
 
-### Prerequisites
+Whatsy runs on your server, holds a single WhatsApp connection, and exposes a REST API so your apps can send WhatsApp messages with a one-liner HTTP call.
 
-- Node.js >= 20
-- A **dedicated** WhatsApp number (NOT your personal number Ã¢â‚¬â€ see [Failure Modes](#failure-modes--recovery))
-
-### Local setup
-
-```bash
-cp .env.example .env
-# Edit .env Ã¢â‚¬â€ set ADMIN_KEY at minimum
-npm install
-npm run build
-npm start
+```
+Your app  -->  POST /api/v1/messages  -->  WhatsApp
+              (API key auth)
 ```
 
-The server starts on port 3000 (configurable via `PORT`).
-Open `http://localhost:3000/admin/ui` to access the admin panel.
+---
+
+## Stack
+
+- **Runtime:** Node.js 20 (TypeScript, compiled to `dist/`)
+- **WhatsApp:** Baileys v7 — phone-number pairing, no QR code
+- **Database:** SQLite (`better-sqlite3`) — WAL mode, persistent at `~/whatsy_data/`
+- **Auth:** bcrypt-hashed API keys (project-scoped) + separate admin key
+- **Admin UI:** Single-page HTML at `/admin/ui` — login screen, sidebar nav, custom modals
 
 ---
 
-## Initial WhatsApp Setup
+## API
 
-Whatsy uses **phone-number pairing** (not QR codes). One-time setup:
-
-### Via Admin UI
-
-1. Open `http://your-server/admin/ui`
-2. Enter your `ADMIN_KEY`
-3. In the **WhatsApp Connection** section, enter your dedicated phone number (digits only, with country code Ã¢â‚¬â€ e.g. `919876543210` for +91 98765 43210)
-4. Click **Request Pairing Code**
-5. A code like `ABCD-1234` appears
-6. On your WhatsApp phone: **Settings -> Linked Devices -> Link a Device -> "Link with phone number instead"**
-7. Enter the 8-character code
-8. The status badge at the top turns **green** within ~10 seconds
-
-### Via API
-
+### Send a message
 ```bash
-curl -X POST http://your-server/admin/pair \
-  -H "X-Admin-Key: your-admin-key" \
+curl -X POST https://your-server/api/v1/messages \
+  -H "X-Api-Key: YOUR_PROJECT_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"phone_number": "919876543210"}'
+  -d '{"message": "Order #1234 received!", "recipient": "+91XXXXXXXXXX"}'
 ```
 
-Response:
-```json
-{
-  "pairing_code": "ABCD-1234",
-  "instructions": ["1. Open WhatsApp on your phone", ...]
-}
-```
+Response: `{"id":1,"status":"queued","project":"my-shop","recipient":"+91XXXXXXXXXX"}`
 
----
-
-## Adding a Project
-
-Each project (website, app) gets its own API key and optional default recipient.
-
-### Via Admin UI
-
-Projects -> fill in Name, Default Recipient, optional Description -> **Add Project**
-
-The raw API key is shown once Ã¢â‚¬â€ copy it immediately.
-
-### Via API
-
+### Check status
 ```bash
-curl -X POST http://your-server/admin/projects \
-  -H "X-Admin-Key: your-admin-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "my-shop",
-    "description": "E-commerce alerts",
-    "default_recipient": "+919876543210"
-  }'
+curl https://your-server/api/v1/status
+# {"whatsapp":"connected","uptime_seconds":3600,"queue_length":0}
 ```
 
-Response:
-```json
-{
-  "id": 1,
-  "name": "my-shop",
-  "api_key": "AbCdEfGh...",
-  "note": "Save this API key Ã¢â‚¬â€ it will not be shown again."
-}
-```
-
-**The raw key is shown exactly once.** Store it in your calling project's environment variables.
-
----
-
-## Sending a Message (API Reference)
-
-### `POST /api/v1/messages`
-
-**Headers:**
-```
-X-Api-Key: your-project-api-key
-Content-Type: application/json
-```
-
-**Body:**
-```json
-{
-  "message": "Order #1234 has shipped!",
-  "recipient": "+919876543210"
-}
-```
-
-`recipient` is optional if the project has a `default_recipient` configured.
-
-**Responses:**
-
-| Status | Meaning |
-|--------|---------|
-| `202 Accepted` | Message queued Ã¢â‚¬â€ will send as soon as WhatsApp is connected |
-| `400 Bad Request` | Missing/invalid `message` or `recipient` |
-| `401 Unauthorized` | Invalid or inactive API key |
-| `429 Too Many Requests` | Rate limit exceeded |
-| `503 Service Unavailable` | Message queue is full (WhatsApp likely disconnected) |
-
-**Example (Node.js):**
+### From Node.js
 ```js
-await fetch('https://your-server/api/v1/messages', {
+await fetch(`${process.env.WHATSY_URL}/api/v1/messages`, {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Api-Key': process.env.WHATSY_API_KEY,
-  },
-  body: JSON.stringify({
-    message: `New order #${order.id} from ${order.customer}`,
-  }),
+  headers: { 'Content-Type': 'application/json', 'X-Api-Key': process.env.WHATSY_API_KEY },
+  body: JSON.stringify({ message: `Order #${order.id} shipped` }),
 });
 ```
 
-**Example (PHP):**
+### From PHP
 ```php
-$ch = curl_init('https://your-server/api/v1/messages');
+$ch = curl_init(getenv('WHATSY_URL') . '/api/v1/messages');
 curl_setopt_array($ch, [
-  CURLOPT_POST => true,
-  CURLOPT_HTTPHEADER => [
-    'Content-Type: application/json',
-    'X-Api-Key: ' . getenv('WHATSY_API_KEY'),
-  ],
-  CURLOPT_POSTFIELDS => json_encode(['message' => 'Alert: disk usage at 90%']),
+  CURLOPT_POST           => true,
+  CURLOPT_HTTPHEADER     => ['Content-Type: application/json', 'X-Api-Key: ' . getenv('WHATSY_API_KEY')],
+  CURLOPT_POSTFIELDS     => json_encode(['message' => "New order #{$order->id}"]),
   CURLOPT_RETURNTRANSFER => true,
 ]);
-$response = curl_exec($ch);
+curl_exec($ch);
 ```
 
 ---
 
-## Admin API Reference
+## Self-hosting
 
-All admin endpoints require the `X-Admin-Key` header.
+### Requirements
+- Node.js 20+
+- A dedicated WhatsApp phone number (do not use your personal number)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/v1/status` | WhatsApp connection status (no auth) |
-| `POST` | `/admin/pair` | Request WhatsApp pairing code |
-| `GET` | `/admin/projects` | List all projects with key prefixes |
-| `POST` | `/admin/projects` | Create project, get API key |
-| `PATCH` | `/admin/projects/:id` | Update project (recipient, active state) |
-| `POST` | `/admin/projects/:id/keys` | Add a new API key to a project |
-| `DELETE` | `/admin/projects/:id/keys/:keyId` | Revoke an API key (immediate effect) |
-| `GET` | `/admin/messages` | Message log (`?project=name&status=sent&limit=50`) |
-
----
-
-## Failure Modes & Recovery
-
-### WhatsApp disconnects mid-operation
-
-**What happens:** Messages received during disconnection are held in an in-memory queue (up to `MAX_QUEUE_SIZE`, default 100). The server reconnects automatically with exponential backoff (1s -> 2s -> ... -> 5 minutes).
-
-**You'll know it happened:** The admin UI status badge goes red/orange. The `/api/v1/status` endpoint returns `"whatsapp": "disconnected"`.
-
-**Recovery:** Usually automatic within seconds. If it persists beyond a few minutes, check:
-1. `pm2 logs whatsy` for connection error details
-2. Is the phone with the linked account online and on a working network?
-3. Did WhatsApp push an update that logged out linked devices?
-
-### WhatsApp logged out (code 401)
-
-**What happens:** WhatsApp explicitly revoked the session. This happens if:
-- You manually removed the linked device from your phone
-- The account was flagged (rare at this volume)
-- Session files were corrupted
-
-**Recovery:**
-1. The server will log `"WhatsApp logged out (code 401). Session cleared."`
-2. Call `POST /admin/pair` with your phone number to re-pair
-3. No restart needed Ã¢â‚¬â€ the server handles this automatically
-
-### Queue full (503)
-
-**What happens:** More than `MAX_QUEUE_SIZE` messages arrived while disconnected.
-
-**Recovery:** Once WhatsApp reconnects, new messages will start flowing again. The overflowed messages are marked `failed` in the log. Check `/admin/messages?status=failed` and resend manually if critical.
-
-### Account flagged or banned
-
-**Prevention (by design):**
-- Messages are spaced 2-5 seconds apart with random jitter
-- `markOnlineOnConnect: false` Ã¢â‚¬â€ the bot appears passive
-- Low volume (a few hundred messages/month) is far below ban thresholds
-
-**If it happens anyway:** Use a new dedicated phone number and re-pair. Your projects only need to update `WA_PHONE_NUMBER` in `.env` Ã¢â‚¬â€ the API layer is unaffected.
-
-> **Never use your primary personal number.** If the bot number gets banned, you lose that number Ã¢â‚¬â€ not your main one.
-
-### The Baileys library breaks (WhatsApp protocol change)
-
-This happens occasionally when WhatsApp changes its Web API. The WhiskeySockets community typically patches it within a few days.
-
-**Recovery:**
-1. `npm update @whiskeysockets/baileys`
-2. `npm run build`
-3. `pm2 restart whatsy`
-
----
-
-## Deployment on Hostinger
-
-### Architecture: Whatsy as its own separate site
-
-Whatsy is deployed as its **own standalone Node.js site in hPanel**, completely independent of shudhham.in.
-
-**Why this matters:** shudhham.in uses Hostinger's versioned build system. Every shudhham.in redeploy wipes its versioned folder and swaps a symlink. Whatsy code placed inside shudhham.in's deploy tree would be silently destroyed on the next routine shudhham.in redeploy. They must be isolated.
-
-**The layout:**
-
-```
-/home/u392157842/
-+-- domains/
-|   +-- shudhham.in/           <- your existing site (independent pipeline)
-|   +-- honeydew-butterfly-241889.hostingersite.com/    <- Whatsy's own site (independent pipeline)
-|       +-- hbuilds/
-|           +-- current -> versions/{latest-id}/
-|           +-- versions/{id}/nodejs/   <- Whatsy code lives here
-+-- whatsy_data/               <- PERSISTENT DATA (outside both pipelines)
-    +-- auth_state/
-    +-- whatsy.db
-    +-- connection.log
+### Environment variables
+```env
+NODE_ENV=production
+PORT=3000
+ADMIN_KEY=<random 32-byte base64url string>
+DATA_DIR=/absolute/path/to/whatsy_data
+MESSAGE_DELAY_MIN_MS=2000
+MESSAGE_DELAY_MAX_MS=5000
+LOG_LEVEL=info
 ```
 
-### Steps
+Generate a key: `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`
 
-1. **Create Whatsy's site in hPanel:**
-   - hPanel -> Websites -> Add New Website
-   - Subdomain: `honeydew-butterfly-241889.hostingersite.com` (or any name)
-   - Type: Node.js
-   - This creates an isolated deploy pipeline that shudhham.in never touches
-
-2. **Create the persistent data directory** (one-time, via SSH):
-   ```bash
-   ssh u392157842@82.112.229.41 -p 65002
-   mkdir -p ~/whatsy_data
-   ```
-
-3. **Set environment variables** in hPanel -> honeydew-butterfly-241889.hostingersite.com -> Node.js -> Environment Variables:
-   ```
-   NODE_ENV=production
-   PORT=3000
-   ADMIN_KEY=your-long-random-key
-   DATA_DIR=/home/u392157842/whatsy_data
-   MESSAGE_DELAY_MIN_MS=2000
-   MESSAGE_DELAY_MAX_MS=5000
-   ```
-
-4. **Build locally and deploy** to Whatsy's own versioned folder:
-   ```bash
-   npm run build
-   # Upload dist/, node_modules/, package.json, pm2.config.js via SFTP to:
-   # ~/domains/honeydew-butterfly-241889.hostingersite.com/hbuilds/versions/{current-id}/nodejs/
-   ```
-
-5. **Start with PM2** (via SSH):
-   ```bash
-   cd ~/domains/honeydew-butterfly-241889.hostingersite.com/hbuilds/versions/$(ls -t ~/domains/honeydew-butterfly-241889.hostingersite.com/hbuilds/versions | head -1)/nodejs
-   pm2 start pm2.config.js
-   pm2 save
-   pm2 startup   # follow the printed instructions
-   ```
-
-6. **First run:** Call `POST /admin/pair` to link your WhatsApp number.
-
-### Redeploy workflow
-
-`~/whatsy_data/` is never touched by redeployment of either site.
-
+### Local development
 ```bash
-npm run build
-# Upload only dist/ via SFTP (it's the only thing that changes)
-pm2 restart whatsy
+npm install
+cp .env.example .env   # fill in values
+npm run build:local    # tsc + copy static assets
+node dist/index.js
 ```
-## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `3000` | HTTP port |
-| `ADMIN_KEY` | **required** | Secret key for all `/admin/*` endpoints |
-| `DATA_DIR` | `./data` | Persistent data directory. On Hostinger: `/home/u392157842/whatsy_data` |
-| `WA_PHONE_NUMBER` | `""` | Your WhatsApp number for pairing (optional Ã¢â‚¬â€ can also be passed to `/admin/pair`) |
-| `MESSAGE_DELAY_MIN_MS` | `2000` | Minimum jitter delay between messages |
-| `MESSAGE_DELAY_MAX_MS` | `5000` | Maximum jitter delay between messages |
-| `MAX_QUEUE_SIZE` | `100` | Max messages held in memory while disconnected |
-| `REDACT_BODIES` | `false` | Set `true` to omit message text from the log table |
-| `LOG_LEVEL` | `info` | `debug` / `info` / `warn` / `error` |
+### Deploy (Hostinger / any Node.js host)
+1. Connect this repo to your host's Git integration
+2. Set the environment variables above
+3. Entry point: `dist/index.js` | Build command: `echo skip` (dist is pre-committed)
+4. SSH in and create the data directory: `mkdir -p /path/to/whatsy_data`
+5. Deploy — server starts and logs `Whatsy listening on port 3000`
+
+### Pair WhatsApp (after first deploy)
+```bash
+curl -X POST https://your-server/admin/pair \
+  -H "X-Admin-Key: YOUR_ADMIN_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"phone_number": "91XXXXXXXXXX"}'
+```
+Enter the returned 8-char code in WhatsApp: **Settings → Linked Devices → Link a Device → Link with phone number instead**
+
+---
+
+## Admin UI
+
+Visit `/admin/ui` — login with your `ADMIN_KEY`.
+
+- **Overview** — WhatsApp status, queue, uptime, recent message timeline, quick send test
+- **Pair WhatsApp** — step-by-step pairing with code display
+- **Projects** — create/manage projects, generate/revoke API keys
+- **Message Logs** — filterable history of all messages sent
+
+---
+
+## Architecture notes
+
+- One WhatsApp connection per server (shared across all projects)
+- Messages are queued in SQLite and drained with 2–5 s jitter to avoid rate limiting
+- Persistent data (`auth_state/`, `whatsy.db`, `connection.log`) lives outside the deploy tree — survives all redeployments
+- `dist/` is committed so the server never needs TypeScript installed
+- No PM2 needed — Hostinger's Node.js runner manages the process
+
+---
+
+## License
+
+MIT
