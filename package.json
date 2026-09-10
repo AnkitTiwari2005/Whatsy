@@ -14,7 +14,7 @@
         "@hapi/boom": "^10.0.1",
         "@whiskeysockets/baileys": "^7.0.0-rc14",
         "bcryptjs": "^2.4.3",
-        "better-sqlite3": "^13.0.3",
+        "better-sqlite3": "^9.6.0",
         "cors": "^2.8.5",
         "dotenv": "^16.4.7",
         "express": "^5.0.1",
