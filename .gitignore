@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build output -- dist/ IS committed so Hostinger Git deploy works without a build step
+
+# Runtime data (persisted outside app dir on server — see README)
+auth_state/
+data/
+
+# Environment
+.env
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
