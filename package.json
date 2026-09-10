@@ -4,7 +4,8 @@
     "description": "Self-hosted WhatsApp notification API",
     "main": "dist/index.js",
     "scripts": {
-        "build": "tsc && npm run copy-assets",
+        "build": "echo dist/ is pre-built, skipping compile",
+    "build:local": "tsc && npm run copy-assets",
         "copy-assets": "node -e \"const fs=require('fs');fs.mkdirSync('dist/db',{recursive:true});fs.mkdirSync('dist/admin-ui',{recursive:true});fs.copyFileSync('src/db/schema.sql','dist/db/schema.sql');fs.copyFileSync('src/admin-ui/index.html','dist/admin-ui/index.html');console.log('Assets copied.')\"",
         "start": "node dist/index.js",
         "dev": "tsx watch src/index.ts",
