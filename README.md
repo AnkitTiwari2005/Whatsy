@@ -1,6 +1,6 @@
 # Whatsy
 
-> A self-hosted WhatsApp notification API â€” one WhatsApp connection, clean REST API, multi-project API key auth.
+> A self-hosted WhatsApp notification API Ã¢â‚¬â€ one WhatsApp connection, clean REST API, multi-project API key auth.
 
 ## Table of Contents
 
@@ -20,13 +20,13 @@
 ### Prerequisites
 
 - Node.js >= 20
-- A **dedicated** WhatsApp number (NOT your personal number â€” see [Failure Modes](#failure-modes--recovery))
+- A **dedicated** WhatsApp number (NOT your personal number Ã¢â‚¬â€ see [Failure Modes](#failure-modes--recovery))
 
 ### Local setup
 
 ```bash
 cp .env.example .env
-# Edit .env â€” set ADMIN_KEY at minimum
+# Edit .env Ã¢â‚¬â€ set ADMIN_KEY at minimum
 npm install
 npm run build
 npm start
@@ -45,7 +45,7 @@ Whatsy uses **phone-number pairing** (not QR codes). One-time setup:
 
 1. Open `http://your-server/admin/ui`
 2. Enter your `ADMIN_KEY`
-3. In the **WhatsApp Connection** section, enter your dedicated phone number (digits only, with country code â€” e.g. `919876543210` for +91 98765 43210)
+3. In the **WhatsApp Connection** section, enter your dedicated phone number (digits only, with country code Ã¢â‚¬â€ e.g. `919876543210` for +91 98765 43210)
 4. Click **Request Pairing Code**
 5. A code like `ABCD-1234` appears
 6. On your WhatsApp phone: **Settings -> Linked Devices -> Link a Device -> "Link with phone number instead"**
@@ -79,7 +79,7 @@ Each project (website, app) gets its own API key and optional default recipient.
 
 Projects -> fill in Name, Default Recipient, optional Description -> **Add Project**
 
-The raw API key is shown once â€” copy it immediately.
+The raw API key is shown once Ã¢â‚¬â€ copy it immediately.
 
 ### Via API
 
@@ -100,7 +100,7 @@ Response:
   "id": 1,
   "name": "my-shop",
   "api_key": "AbCdEfGh...",
-  "note": "Save this API key â€” it will not be shown again."
+  "note": "Save this API key Ã¢â‚¬â€ it will not be shown again."
 }
 ```
 
@@ -132,7 +132,7 @@ Content-Type: application/json
 
 | Status | Meaning |
 |--------|---------|
-| `202 Accepted` | Message queued â€” will send as soon as WhatsApp is connected |
+| `202 Accepted` | Message queued Ã¢â‚¬â€ will send as soon as WhatsApp is connected |
 | `400 Bad Request` | Missing/invalid `message` or `recipient` |
 | `401 Unauthorized` | Invalid or inactive API key |
 | `429 Too Many Requests` | Rate limit exceeded |
@@ -209,7 +209,7 @@ All admin endpoints require the `X-Admin-Key` header.
 **Recovery:**
 1. The server will log `"WhatsApp logged out (code 401). Session cleared."`
 2. Call `POST /admin/pair` with your phone number to re-pair
-3. No restart needed â€” the server handles this automatically
+3. No restart needed Ã¢â‚¬â€ the server handles this automatically
 
 ### Queue full (503)
 
@@ -221,12 +221,12 @@ All admin endpoints require the `X-Admin-Key` header.
 
 **Prevention (by design):**
 - Messages are spaced 2-5 seconds apart with random jitter
-- `markOnlineOnConnect: false` â€” the bot appears passive
+- `markOnlineOnConnect: false` Ã¢â‚¬â€ the bot appears passive
 - Low volume (a few hundred messages/month) is far below ban thresholds
 
-**If it happens anyway:** Use a new dedicated phone number and re-pair. Your projects only need to update `WA_PHONE_NUMBER` in `.env` â€” the API layer is unaffected.
+**If it happens anyway:** Use a new dedicated phone number and re-pair. Your projects only need to update `WA_PHONE_NUMBER` in `.env` Ã¢â‚¬â€ the API layer is unaffected.
 
-> **Never use your primary personal number.** If the bot number gets banned, you lose that number â€” not your main one.
+> **Never use your primary personal number.** If the bot number gets banned, you lose that number Ã¢â‚¬â€ not your main one.
 
 ### The Baileys library breaks (WhatsApp protocol change)
 
@@ -253,7 +253,7 @@ Whatsy is deployed as its **own standalone Node.js site in hPanel**, completely 
 /home/u392157842/
 +-- domains/
 |   +-- shudhham.in/           <- your existing site (independent pipeline)
-|   +-- whatsy.shudhham.in/    <- Whatsy's own site (independent pipeline)
+|   +-- honeydew-butterfly-241889.hostingersite.com/    <- Whatsy's own site (independent pipeline)
 |       +-- hbuilds/
 |           +-- current -> versions/{latest-id}/
 |           +-- versions/{id}/nodejs/   <- Whatsy code lives here
@@ -267,7 +267,7 @@ Whatsy is deployed as its **own standalone Node.js site in hPanel**, completely 
 
 1. **Create Whatsy's site in hPanel:**
    - hPanel -> Websites -> Add New Website
-   - Subdomain: `whatsy.shudhham.in` (or any name)
+   - Subdomain: `honeydew-butterfly-241889.hostingersite.com` (or any name)
    - Type: Node.js
    - This creates an isolated deploy pipeline that shudhham.in never touches
 
@@ -277,7 +277,7 @@ Whatsy is deployed as its **own standalone Node.js site in hPanel**, completely 
    mkdir -p ~/whatsy_data
    ```
 
-3. **Set environment variables** in hPanel -> whatsy.shudhham.in -> Node.js -> Environment Variables:
+3. **Set environment variables** in hPanel -> honeydew-butterfly-241889.hostingersite.com -> Node.js -> Environment Variables:
    ```
    NODE_ENV=production
    PORT=3000
@@ -291,12 +291,12 @@ Whatsy is deployed as its **own standalone Node.js site in hPanel**, completely 
    ```bash
    npm run build
    # Upload dist/, node_modules/, package.json, pm2.config.js via SFTP to:
-   # ~/domains/whatsy.shudhham.in/hbuilds/versions/{current-id}/nodejs/
+   # ~/domains/honeydew-butterfly-241889.hostingersite.com/hbuilds/versions/{current-id}/nodejs/
    ```
 
 5. **Start with PM2** (via SSH):
    ```bash
-   cd ~/domains/whatsy.shudhham.in/hbuilds/versions/$(ls -t ~/domains/whatsy.shudhham.in/hbuilds/versions | head -1)/nodejs
+   cd ~/domains/honeydew-butterfly-241889.hostingersite.com/hbuilds/versions/$(ls -t ~/domains/honeydew-butterfly-241889.hostingersite.com/hbuilds/versions | head -1)/nodejs
    pm2 start pm2.config.js
    pm2 save
    pm2 startup   # follow the printed instructions
@@ -320,7 +320,7 @@ pm2 restart whatsy
 | `PORT` | `3000` | HTTP port |
 | `ADMIN_KEY` | **required** | Secret key for all `/admin/*` endpoints |
 | `DATA_DIR` | `./data` | Persistent data directory. On Hostinger: `/home/u392157842/whatsy_data` |
-| `WA_PHONE_NUMBER` | `""` | Your WhatsApp number for pairing (optional â€” can also be passed to `/admin/pair`) |
+| `WA_PHONE_NUMBER` | `""` | Your WhatsApp number for pairing (optional Ã¢â‚¬â€ can also be passed to `/admin/pair`) |
 | `MESSAGE_DELAY_MIN_MS` | `2000` | Minimum jitter delay between messages |
 | `MESSAGE_DELAY_MAX_MS` | `5000` | Maximum jitter delay between messages |
 | `MAX_QUEUE_SIZE` | `100` | Max messages held in memory while disconnected |

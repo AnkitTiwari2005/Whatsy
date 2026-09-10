@@ -1,13 +1,16 @@
-# Dependencies
+# Dependencies — install with: npm install
 node_modules/
 
-# Build output -- dist/ IS committed so Hostinger Git deploy works without a build step
+# Build output — dist/ IS committed so Hostinger Git deploy works without a build step
+# After code changes: npm run build, then commit dist/ and push
 
-# Runtime data (persisted outside app dir on server — see README)
+# WhatsApp session files (live on server at DATA_DIR/auth_state/)
 auth_state/
+
+# Local SQLite database and data dir (live on server at DATA_DIR/)
 data/
 
-# Environment
+# Environment secrets — copy .env.example and fill in values, never commit .env
 .env
 
 # Logs
