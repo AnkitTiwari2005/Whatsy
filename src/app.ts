@@ -1,4 +1,4 @@
-﻿import express from 'express';
+import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
@@ -38,8 +38,8 @@ export function createApp() {
   app.use('/admin/pair', adminKeyAuth, pairRouter);
 
   // Admin UI — static HTML
-  app.use('/admin/ui', adminKeyAuth, express.static(path.join(__dirname, 'admin-ui')));
-  app.get('/admin', adminKeyAuth, (_req, res) => res.redirect('/admin/ui'));
+  app.use('/admin/ui', express.static(path.join(__dirname, 'admin-ui')));
+  app.get('/admin', (_req, res) => res.redirect('/admin/ui'));
 
   // Health check
   app.get('/health', (_req, res) => res.json({ ok: true }));

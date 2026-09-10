@@ -36,8 +36,8 @@ function createApp() {
     app.use('/admin/messages', adminAuth_1.adminKeyAuth, logs_1.logsRouter);
     app.use('/admin/pair', adminAuth_1.adminKeyAuth, pair_1.default);
     // Admin UI — static HTML
-    app.use('/admin/ui', adminAuth_1.adminKeyAuth, express_1.default.static(path_1.default.join(__dirname, 'admin-ui')));
-    app.get('/admin', adminAuth_1.adminKeyAuth, (_req, res) => res.redirect('/admin/ui'));
+    app.use('/admin/ui', express_1.default.static(path_1.default.join(__dirname, 'admin-ui')));
+    app.get('/admin', (_req, res) => res.redirect('/admin/ui'));
     // Health check
     app.get('/health', (_req, res) => res.json({ ok: true }));
     // 404
