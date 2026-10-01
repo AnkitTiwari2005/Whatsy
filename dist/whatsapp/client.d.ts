@@ -12,6 +12,6 @@ export declare function getStatus(): {
 };
 export declare function connectWhatsApp(): Promise<void>;
 export declare function requestPairing(phoneNumber: string): Promise<string>;
-export declare function enqueueMessage(msg: QueuedMessage): void;
+export declare function enqueueMessage(msg: QueuedMessage, priority?: boolean): void;
 export declare function getQueueLength(): number;
 //# sourceMappingURL=client.d.ts.map

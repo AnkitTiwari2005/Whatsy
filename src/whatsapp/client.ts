@@ -218,12 +218,16 @@ export async function requestPairing(phoneNumber: string): Promise<string> {
 
 // ── Queue ─────────────────────────────────────────────────────────────────────
 
-export function enqueueMessage(msg: QueuedMessage): void {
+export function enqueueMessage(msg: QueuedMessage, priority: boolean = false): void {
   if (messageQueue.length >= config.maxQueueSize) {
     throw new Error(`Message queue full (limit: ${config.maxQueueSize}). WhatsApp may be disconnected.`);
   }
-  messageQueue.push(msg);
-  logger.debug({ messageId: msg.messageId, queueLength: messageQueue.length }, 'Message enqueued');
+  if (priority) {
+    messageQueue.unshift(msg);
+  } else {
+    messageQueue.push(msg);
+  }
+  logger.debug({ messageId: msg.messageId, queueLength: messageQueue.length, priority }, 'Message enqueued');
   if (connectionStatus === 'connected') {
     setImmediate(() => drainQueue());
   }

@@ -11,6 +11,7 @@ const path_1 = __importDefault(require("path"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const adminAuth_1 = require("./api/middleware/adminAuth");
 const messages_1 = require("./api/messages");
+const otp_1 = require("./api/otp");
 const status_1 = require("./api/status");
 const projects_1 = require("./api/admin/projects");
 const logs_1 = require("./api/admin/logs");
@@ -27,10 +28,19 @@ function createApp() {
         legacyHeaders: false,
         message: { error: 'Too many requests, slow down' },
     });
+    const otpLimiter = (0, express_rate_limit_1.default)({
+        windowMs: 60_000,
+        max: 30,
+        standardHeaders: true,
+        legacyHeaders: false,
+        message: { error: 'Too many OTP requests, please slow down' },
+    });
     // Public status — no auth, useful for uptime monitoring
     app.use('/api/v1/status', status_1.statusRouter);
     // Message sending — API key auth applied inside router
     app.use('/api/v1/messages', apiLimiter, messages_1.messagesRouter);
+    // OTP generation & verification — API key auth applied inside router
+    app.use('/api/v1/otp', otpLimiter, otp_1.otpRouter);
     // Admin routes — ADMIN_KEY required
     app.use('/admin/projects', adminAuth_1.adminKeyAuth, projects_1.projectsRouter);
     app.use('/admin/messages', adminAuth_1.adminKeyAuth, logs_1.logsRouter);

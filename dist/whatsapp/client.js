@@ -201,12 +201,17 @@ async function requestPairing(phoneNumber) {
     return code;
 }
 // ── Queue ─────────────────────────────────────────────────────────────────────
-function enqueueMessage(msg) {
+function enqueueMessage(msg, priority = false) {
     if (messageQueue.length >= config_1.config.maxQueueSize) {
         throw new Error(`Message queue full (limit: ${config_1.config.maxQueueSize}). WhatsApp may be disconnected.`);
     }
-    messageQueue.push(msg);
-    logger_1.logger.debug({ messageId: msg.messageId, queueLength: messageQueue.length }, 'Message enqueued');
+    if (priority) {
+        messageQueue.unshift(msg);
+    }
+    else {
+        messageQueue.push(msg);
+    }
+    logger_1.logger.debug({ messageId: msg.messageId, queueLength: messageQueue.length, priority }, 'Message enqueued');
     if (connectionStatus === 'connected') {
         setImmediate(() => drainQueue());
     }

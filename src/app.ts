@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 
 import { adminKeyAuth } from './api/middleware/adminAuth';
 import { messagesRouter } from './api/messages';
+import { otpRouter } from './api/otp';
 import { statusRouter } from './api/status';
 import { projectsRouter } from './api/admin/projects';
 import { logsRouter } from './api/admin/logs';
@@ -26,11 +27,22 @@ export function createApp() {
     message: { error: 'Too many requests, slow down' },
   });
 
+  const otpLimiter = rateLimit({
+    windowMs: 60_000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many OTP requests, please slow down' },
+  });
+
   // Public status — no auth, useful for uptime monitoring
   app.use('/api/v1/status', statusRouter);
 
   // Message sending — API key auth applied inside router
   app.use('/api/v1/messages', apiLimiter, messagesRouter);
+
+  // OTP generation & verification — API key auth applied inside router
+  app.use('/api/v1/otp', otpLimiter, otpRouter);
 
   // Admin routes — ADMIN_KEY required
   app.use('/admin/projects', adminKeyAuth, projectsRouter);

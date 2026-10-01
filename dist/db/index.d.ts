@@ -29,4 +29,14 @@ export interface MessageRow {
     sent_at: string | null;
     created_at: string;
 }
+export interface OtpRow {
+    id: number;
+    project_id: number;
+    phone: string;
+    code_hash: string;
+    attempts_left: number;
+    verified: number;
+    expires_at: string;
+    created_at: string;
+}
 //# sourceMappingURL=index.d.ts.map
