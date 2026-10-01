@@ -248,6 +248,16 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
 .mt4{margin-top:4px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 .instr{padding-left:20px;color:var(--t3);font-size:.8rem;line-height:2.2}
 .instr li{padding-left:4px}
+
+/* ─── CODE SNIPPETS & DOCS ───────────────── */
+.code-block{background:var(--s2);border:1px solid var(--b);border-radius:var(--R);padding:14px 16px;position:relative;margin:10px 0;overflow-x:auto}
+.code-block pre{font-family:'Courier New',Consolas,monospace;font-size:.78rem;line-height:1.65;color:#93c5fd;margin:0;white-space:pre}
+.code-tabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--b);padding-bottom:10px}
+.code-tab{padding:6px 14px;border-radius:var(--R);font-size:.78rem;font-weight:600;color:var(--t3);cursor:pointer;transition:all .15s;background:transparent;border:1px solid transparent;font-family:inherit}
+.code-tab:hover{color:var(--t1);background:rgba(255,255,255,.04)}
+.code-tab.active{color:#000;background:var(--g);border-color:var(--g);box-shadow:0 2px 10px rgba(34,197,94,.25)}
+.copy-code-btn{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.07);border:1px solid var(--b);color:var(--t2);padding:4px 10px;border-radius:6px;font-size:.72rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .14s;font-family:inherit}
+.copy-code-btn:hover{background:rgba(255,255,255,.14);color:var(--t1)}
 </style>
 </head>
 <body>
@@ -258,6 +268,8 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
   <svg id="ic-phone" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"/></svg>
   <svg id="ic-folder" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
   <svg id="ic-file" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+  <svg id="ic-lock" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  <svg id="ic-code" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
   <svg id="ic-logout" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
   <svg id="ic-chat" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
   <svg id="ic-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -330,6 +342,8 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
   </div>
   <nav>
    <div class="ni on" id="ni-ov" onclick="gp('ov')"><span class="ico"></span><span>Overview</span></div>
+   <div class="ni" id="ni-otp" onclick="gp('otp')"><span class="ico"></span><span>OTP Service</span><span class="sb-badge" style="background:var(--g);color:#000;font-size:.58rem;padding:1px 6px;margin-left:auto;font-weight:800;border-radius:10px">NEW</span></div>
+   <div class="ni" id="ni-docs" onclick="gp('docs')"><span class="ico"></span><span>API &amp; Connect</span></div>
    <div class="ni" id="ni-pr" onclick="gp('pr')"><span class="ico"></span><span>Pair WhatsApp</span></div>
    <div class="ni" id="ni-pj" onclick="gp('pj')"><span class="ico"></span><span>Projects</span></div>
    <div class="ni" id="ni-lg" onclick="gp('lg')"><span class="ico"></span><span>Message Logs</span><span class="sb-badge" id="qb" style="display:none">0</span></div>
@@ -362,6 +376,25 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
      <div class="sk-sub">since last restart</div>
     </div>
    </div>
+   <!-- NEW FEATURE HIGHLIGHT -->
+   <div class="card" style="background:linear-gradient(135deg,rgba(34,197,94,.07) 0%,rgba(23,23,27,.95) 100%);border-color:rgba(34,197,94,.25)">
+    <div class="fl fca jsb" style="flex-wrap:wrap;gap:12px">
+     <div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+       <span class="bx bx-active" style="padding:2px 7px;font-size:.65rem">NEW FEATURE</span>
+       <span style="font-weight:700;font-size:.9rem;color:var(--t1)">Turnkey WhatsApp OTP Engine</span>
+      </div>
+      <p style="font-size:.76rem;color:var(--t2);max-width:550px">
+       Generate, send, and verify 6-digit WhatsApp OTPs with salted HMAC-SHA256 hashing, priority queue jumping, 60s cooldown, and automatic 3-attempt brute-force lock.
+      </p>
+     </div>
+     <div style="display:flex;gap:8px;flex-shrink:0">
+      <button class="btn bp bs" onclick="gp('otp')" style="gap:5px"><svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Test OTP</span></button>
+      <button class="btn bg bs" onclick="gp('docs')" style="gap:5px"><svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg><span>Connect Code</span></button>
+     </div>
+    </div>
+   </div>
+
    <div class="card">
     <div class="ch">
      <span class="ct">Recent Messages</span>
@@ -449,6 +482,213 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
    </div>
   </div>
 
+  <!-- OTP SERVICE -->
+  <div class="page" id="pg-otp">
+   <div class="ph">
+    <h2>OTP Verification Service</h2>
+    <p>High-priority WhatsApp verification code generation &amp; validation</p>
+   </div>
+
+   <div class="card" style="margin-bottom:14px">
+    <div class="ch">
+     <span class="ct">Interactive OTP Tester</span>
+     <span class="bx bx-active">Priority Queue</span>
+    </div>
+    
+    <div class="fg2">
+     <div class="fg">
+      <label>Recipient Phone Number *</label>
+      <input type="tel" id="otp-phone" placeholder="+91XXXXXXXXXX (with country code)">
+     </div>
+     <div class="fg">
+      <label>Project API Key *</label>
+      <input type="text" id="otp-key" placeholder="Paste project API key">
+     </div>
+    </div>
+
+    <div class="fg2">
+     <div class="fg">
+      <label>Code Length</label>
+      <select id="otp-digits">
+       <option value="6" selected>6 Digits (Standard)</option>
+       <option value="4">4 Digits</option>
+       <option value="8">8 Digits</option>
+      </select>
+     </div>
+     <div class="fg">
+      <label>Expiry Time</label>
+      <select id="otp-expiry">
+       <option value="5" selected>5 Minutes (Recommended)</option>
+       <option value="2">2 Minutes</option>
+       <option value="10">10 Minutes</option>
+       <option value="15">15 Minutes</option>
+      </select>
+     </div>
+    </div>
+
+    <div class="fg">
+     <label>Message Template (Must include {code})</label>
+     <input type="text" id="otp-tpl" value="Your verification code is: *{code}*. Valid for {minutes} minutes. Please do not share this code with anyone.">
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap">
+     <button class="btn bp" id="otp-send-btn" onclick="sendOtpTest()">
+      <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      <span>Send OTP to WhatsApp</span>
+     </button>
+     <button class="btn bg bs" onclick="gp('docs')">View Code Snippets &rarr;</button>
+    </div>
+
+    <div id="otp-send-res"></div>
+   </div>
+
+   <!-- VERIFY CODE CARD -->
+   <div class="card" id="otp-verify-card" style="margin-bottom:14px">
+    <div class="ch">
+     <span class="ct">Verify Received Code</span>
+     <span id="otp-attempt-badge" class="bx bx-inactive">3 Attempts Allowed</span>
+    </div>
+    <div class="fg2">
+     <div class="fg">
+      <label>Verification Code</label>
+      <input type="text" id="otp-verify-code" placeholder="Enter code received on WhatsApp" style="font-family:'Courier New',monospace;font-size:1.05rem;letter-spacing:4px">
+     </div>
+     <div class="fg" style="display:flex;align-items:flex-end">
+      <button class="btn bp bl" id="otp-verify-btn" onclick="verifyOtpTest()" style="width:100%">
+       <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+       <span>Verify Code</span>
+      </button>
+     </div>
+    </div>
+    <div id="otp-verify-res"></div>
+   </div>
+
+   <!-- ENGINE GUARANTEES -->
+   <div class="card" style="background:rgba(255,255,255,.015)">
+    <div class="ct" style="margin-bottom:12px">Engine Security Guarantees</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">
+     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">⚡ Priority Queueing</div>
+      <div style="font-size:.72rem;color:var(--t2)">OTPs jump directly to the front of WhatsApp's outbound queue for sub-second dispatch.</div>
+     </div>
+     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">🔒 HMAC-SHA256 Hashing</div>
+      <div style="font-size:.72rem;color:var(--t2)">Plaintext codes are never stored in SQLite. Only salted one-way hashes reside in database.</div>
+     </div>
+     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">⏱️ Timing-Safe Equality</div>
+      <div style="font-size:.72rem;color:var(--t2)">Constant-time comparison via crypto.timingSafeEqual() eliminates side-channel timing leaks.</div>
+     </div>
+     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">🛡️ 3-Attempt Lockout</div>
+      <div style="font-size:.72rem;color:var(--t2)">Code is permanently locked after 3 failed tries. Brute-force attacks are mathematically impossible.</div>
+     </div>
+     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">🚫 60-Second Cooldown</div>
+      <div style="font-size:.72rem;color:var(--t2)">Per-phone rate limiter enforces a 60s cooldown to protect from bot spam and SMS costs.</div>
+     </div>
+     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">🔄 Replay Protection</div>
+      <div style="font-size:.72rem;color:var(--t2)">Once verified, code status is sealed and cannot be reused or re-verified.</div>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- API & CONNECT (DOCS) -->
+  <div class="page" id="pg-docs">
+   <div class="ph">
+    <h2>API &amp; Integration Guide</h2>
+    <p>How to connect your websites, backend apps, and mobile clients to Whatsy</p>
+   </div>
+
+   <!-- Base URL Banner -->
+   <div class="card" style="background:var(--s2);border-color:var(--b2)">
+    <div class="fl fca jsb" style="flex-wrap:wrap;gap:10px">
+     <div>
+      <div style="font-size:.68rem;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px">Server Base URL</div>
+      <div style="font-family:'Courier New',monospace;font-size:.92rem;color:var(--g);margin-top:3px" id="docs-base-url">https://honeydew-butterfly-241889.hostingersite.com</div>
+     </div>
+     <button class="btn bg bs" onclick="cpb(document.getElementById('docs-base-url').textContent,this)">
+      <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span>Copy Base URL</span>
+     </button>
+    </div>
+   </div>
+
+   <!-- Language Selector Tabs -->
+   <div class="code-tabs">
+    <button class="code-tab active" id="tab-curl" onclick="switchLang('curl')">cURL</button>
+    <button class="code-tab" id="tab-js" onclick="switchLang('js')">JavaScript / Node.js</button>
+    <button class="code-tab" id="tab-py" onclick="switchLang('py')">Python</button>
+    <button class="code-tab" id="tab-php" onclick="switchLang('php')">PHP</button>
+   </div>
+
+   <!-- SECTION 1: Send OTP -->
+   <div class="card">
+    <div class="ch">
+     <div>
+      <span class="bx bx-sent" style="margin-right:6px">POST</span>
+      <span style="font-weight:700;font-size:.86rem;color:var(--t1)">/api/v1/otp/send</span>
+      <span style="font-size:.72rem;color:var(--t3);margin-left:8px">&mdash; Generate &amp; Send WhatsApp OTP</span>
+     </div>
+    </div>
+    <div style="font-size:.75rem;color:var(--t2);margin-bottom:8px">Sends a cryptographically secure 6-digit code with priority queue dispatch.</div>
+    <div class="code-block">
+     <button class="copy-code-btn" onclick="copySnippet('snip-otp-send',this)">Copy</button>
+     <pre id="snip-otp-send"></pre>
+    </div>
+   </div>
+
+   <!-- SECTION 2: Verify OTP -->
+   <div class="card">
+    <div class="ch">
+     <div>
+      <span class="bx bx-sent" style="margin-right:6px">POST</span>
+      <span style="font-weight:700;font-size:.86rem;color:var(--t1)">/api/v1/otp/verify</span>
+      <span style="font-size:.72rem;color:var(--t3);margin-left:8px">&mdash; Verify Entered Code</span>
+     </div>
+    </div>
+    <div style="font-size:.75rem;color:var(--t2);margin-bottom:8px">Validates user-submitted OTP with timing-safe comparison and 3-attempt brute-force protection.</div>
+    <div class="code-block">
+     <button class="copy-code-btn" onclick="copySnippet('snip-otp-verify',this)">Copy</button>
+     <pre id="snip-otp-verify"></pre>
+    </div>
+   </div>
+
+   <!-- SECTION 3: Send Standard Message -->
+   <div class="card">
+    <div class="ch">
+     <div>
+      <span class="bx bx-sent" style="margin-right:6px">POST</span>
+      <span style="font-weight:700;font-size:.86rem;color:var(--t1)">/api/v1/messages</span>
+      <span style="font-size:.72rem;color:var(--t3);margin-left:8px">&mdash; Send Standard WhatsApp Message</span>
+     </div>
+    </div>
+    <div style="font-size:.75rem;color:var(--t2);margin-bottom:8px">Send alerts, notifications, order updates, or transactional messages.</div>
+    <div class="code-block">
+     <button class="copy-code-btn" onclick="copySnippet('snip-msg-send',this)">Copy</button>
+     <pre id="snip-msg-send"></pre>
+    </div>
+   </div>
+
+   <!-- SECTION 4: Status Check -->
+   <div class="card">
+    <div class="ch">
+     <div>
+      <span class="bx bx-active" style="margin-right:6px">GET</span>
+      <span style="font-weight:700;font-size:.86rem;color:var(--t1)">/api/v1/status</span>
+      <span style="font-size:.72rem;color:var(--t3);margin-left:8px">&mdash; Health &amp; Connection Status</span>
+     </div>
+    </div>
+    <div style="font-size:.75rem;color:var(--t2);margin-bottom:8px">Check whether Whatsy is connected to WhatsApp and inspect queue depth.</div>
+    <div class="code-block">
+     <button class="copy-code-btn" onclick="copySnippet('snip-status',this)">Copy</button>
+     <pre id="snip-status"></pre>
+    </div>
+   </div>
+  </div>
+
  </main>
 </div>
 
@@ -463,6 +703,8 @@ function svgOf(id) {
 (function(){
   var items = [
     ['ni-ov', 'ic-grid'],
+    ['ni-otp', 'ic-lock'],
+    ['ni-docs', 'ic-code'],
     ['ni-pr', 'ic-phone'],
     ['ni-pj', 'ic-folder'],
     ['ni-lg', 'ic-file'],
@@ -630,6 +872,8 @@ function gp(n) {
   if(n==='pj') loadProjs();
   if(n==='ov') loadRec();
   if(n==='lg') loadLogs();
+  if(n==='otp') initOtpPage();
+  if(n==='docs') initDocsPage();
 }
 
 // ─── STATUS POLL ──────────────────────────────────────────────────────────────
@@ -845,6 +1089,394 @@ function tacc(id) {
   var a = document.getElementById(id);
   var h = a.querySelector('.ach'); var b = a.querySelector('.acb');
   h.classList.toggle('op'); b.classList.toggle('op');
+}
+
+// ─── OTP SERVICE & TESTER ─────────────────────────────────────────────────────
+var lastOtpPhone = '';
+var lastOtpKey = '';
+
+function initOtpPage() {
+  var pKey = document.getElementById('otp-key');
+  if(!pKey.value && document.getElementById('qt-k').value) {
+    pKey.value = document.getElementById('qt-k').value;
+  }
+  var pPhone = document.getElementById('otp-phone');
+  if(!pPhone.value && document.getElementById('qt-to').value) {
+    pPhone.value = document.getElementById('qt-to').value;
+  }
+}
+
+async function sendOtpTest() {
+  var phone = document.getElementById('otp-phone').value.trim();
+  var key = document.getElementById('otp-key').value.trim();
+  var digits = document.getElementById('otp-digits').value;
+  var expiry = document.getElementById('otp-expiry').value;
+  var tpl = document.getElementById('otp-tpl').value.trim();
+  var el = document.getElementById('otp-send-res');
+  var btn = document.getElementById('otp-send-btn');
+
+  if(!phone || !key) {
+    toast('Phone number and API key are required', 'er');
+    return;
+  }
+
+  lastOtpPhone = phone;
+  lastOtpKey = key;
+  el.innerHTML = '<div class="al al-ok" style="margin-top:12px">'+svgOf('ic-info')+'<span>Generating &amp; queueing OTP...</span></div>';
+  btn.style.opacity = '.6';
+  btn.style.pointerEvents = 'none';
+
+  try {
+    var res = await fetch('/api/v1/otp/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Api-Key': key
+      },
+      body: JSON.stringify({
+        phone: phone,
+        digits: Number(digits),
+        expiry_minutes: Number(expiry),
+        message_template: tpl || undefined
+      })
+    });
+
+    var data = await res.json();
+    btn.style.opacity = '';
+    btn.style.pointerEvents = '';
+
+    if (res.status === 429) {
+      el.innerHTML = '<div class="al al-er" style="margin-top:12px">'+svgOf('ic-info')+'<span>'+esc(data.error)+' (Cooldown active)</span></div>';
+      toast(data.error, 'er');
+      return;
+    }
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to send OTP');
+    }
+
+    el.innerHTML = '<div class="al al-ok" style="margin-top:12px">'+svgOf('ic-check')+'<span>OTP queued for '+esc(data.phone)+'! Valid for '+Math.floor(data.expires_in_seconds/60)+' min. (Req #'+data.request_id+')</span></div>';
+    toast('OTP sent to WhatsApp!', 'ok');
+
+    // Update verify section
+    document.getElementById('otp-attempt-badge').className = 'bx bx-active';
+    document.getElementById('otp-attempt-badge').textContent = '3 Attempts Allowed';
+    document.getElementById('otp-verify-code').value = '';
+    document.getElementById('otp-verify-res').innerHTML = '';
+    document.getElementById('otp-verify-code').focus();
+
+  } catch(err) {
+    btn.style.opacity = '';
+    btn.style.pointerEvents = '';
+    el.innerHTML = '<div class="al al-er" style="margin-top:12px">'+svgOf('ic-x')+'<span>'+esc(err.message)+'</span></div>';
+    toast(err.message, 'er');
+  }
+}
+
+async function verifyOtpTest() {
+  var phone = document.getElementById('otp-phone').value.trim() || lastOtpPhone;
+  var key = document.getElementById('otp-key').value.trim() || lastOtpKey;
+  var code = document.getElementById('otp-verify-code').value.trim();
+  var el = document.getElementById('otp-verify-res');
+  var badge = document.getElementById('otp-attempt-badge');
+  var btn = document.getElementById('otp-verify-btn');
+
+  if(!phone || !key) {
+    toast('Recipient phone and API key required', 'er');
+    return;
+  }
+  if(!code) {
+    toast('Please enter the verification code', 'er');
+    return;
+  }
+
+  el.innerHTML = '<div class="al al-ok" style="margin-top:12px">'+svgOf('ic-info')+'<span>Verifying code with constant-time equality...</span></div>';
+  btn.style.opacity = '.6';
+  btn.style.pointerEvents = 'none';
+
+  try {
+    var res = await fetch('/api/v1/otp/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Api-Key': key
+      },
+      body: JSON.stringify({
+        phone: phone,
+        code: code
+      })
+    });
+
+    var data = await res.json();
+    btn.style.opacity = '';
+    btn.style.pointerEvents = '';
+
+    if (res.ok && data.verified) {
+      badge.className = 'bx bx-sent';
+      badge.textContent = 'Verified ✓';
+      el.innerHTML = '<div class="al al-ok" style="margin-top:12px;font-size:.88rem;font-weight:600">'+svgOf('ic-check')+'<span>✓ Phone '+esc(data.phone)+' successfully verified!</span></div>';
+      toast('Verification Successful!', 'ok');
+    } else {
+      var remaining = data.attempts_left !== undefined ? data.attempts_left : 0;
+      if (remaining <= 0) {
+        badge.className = 'bx bx-failed';
+        badge.textContent = 'Code Locked 🔒';
+        el.innerHTML = '<div class="al al-er" style="margin-top:12px">'+svgOf('ic-x')+'<span>'+esc(data.error)+'</span></div>';
+      } else {
+        badge.className = 'bx bx-queued';
+        badge.textContent = remaining + ' Attempts Remaining';
+        el.innerHTML = '<div class="al al-er" style="margin-top:12px">'+svgOf('ic-x')+'<span>'+esc(data.error)+' ('+remaining+' tries left)</span></div>';
+      }
+      toast(data.error || 'Verification failed', 'er');
+    }
+  } catch(err) {
+    btn.style.opacity = '';
+    btn.style.pointerEvents = '';
+    el.innerHTML = '<div class="al al-er" style="margin-top:12px">'+svgOf('ic-x')+'<span>'+esc(err.message)+'</span></div>';
+    toast(err.message, 'er');
+  }
+}
+
+// ─── API DOCS & CODE SNIPPETS ─────────────────────────────────────────────────
+var currentLang = 'curl';
+
+function initDocsPage() {
+  var origin = window.location.origin;
+  document.getElementById('docs-base-url').textContent = origin;
+  renderSnippets();
+}
+
+function switchLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.code-tab').forEach(function(btn){
+    btn.classList.remove('active');
+  });
+  var activeBtn = document.getElementById('tab-' + lang);
+  if (activeBtn) activeBtn.classList.add('active');
+  renderSnippets();
+}
+
+function renderSnippets() {
+  var origin = window.location.origin;
+  var key = document.getElementById('qt-k').value.trim() || document.getElementById('otp-key').value.trim() || 'YOUR_PROJECT_API_KEY';
+  var phone = document.getElementById('otp-phone').value.trim() || document.getElementById('qt-to').value.trim() || '+919876543210';
+
+  var snipOtpSend = '';
+  var snipOtpVerify = '';
+  var snipMsgSend = '';
+  var snipStatus = '';
+
+  if (currentLang === 'curl') {
+    snipOtpSend = 'curl -X POST ' + origin + '/api/v1/otp/send \\\n' +
+      '  -H "X-Api-Key: ' + key + '" \\\n' +
+      '  -H "Content-Type: application/json" \\\n' +
+      '  -d \'{\n' +
+      '    "phone": "' + phone + '",\n' +
+      '    "expiry_minutes": 5,\n' +
+      '    "digits": 6\n' +
+      '  }\'';
+
+    snipOtpVerify = 'curl -X POST ' + origin + '/api/v1/otp/verify \\\n' +
+      '  -H "X-Api-Key: ' + key + '" \\\n' +
+      '  -H "Content-Type: application/json" \\\n' +
+      '  -d \'{\n' +
+      '    "phone": "' + phone + '",\n' +
+      '    "code": "123456"\n' +
+      '  }\'';
+
+    snipMsgSend = 'curl -X POST ' + origin + '/api/v1/messages \\\n' +
+      '  -H "X-Api-Key: ' + key + '" \\\n' +
+      '  -H "Content-Type: application/json" \\\n' +
+      '  -d \'{\n' +
+      '    "recipient": "' + phone + '",\n' +
+      '    "message": "Hello from Whatsy! Your order #1234 has shipped."\n' +
+      '  }\'';
+
+    snipStatus = 'curl ' + origin + '/api/v1/status';
+  } else if (currentLang === 'js') {
+    snipOtpSend = '// Step 1: Send OTP to User\n' +
+      'const res = await fetch(\'' + origin + '/api/v1/otp/send\', {\n' +
+      '  method: \'POST\',\n' +
+      '  headers: {\n' +
+      '    \'Content-Type\': \'application/json\',\n' +
+      '    \'X-Api-Key\': \'' + key + '\'\n' +
+      '  },\n' +
+      '  body: JSON.stringify({\n' +
+      '    phone: \'' + phone + '\',\n' +
+      '    expiry_minutes: 5,\n' +
+      '    digits: 6\n' +
+      '  })\n' +
+      '});\n' +
+      'const data = await res.json();\n' +
+      'console.log(data); // { success: true, expires_in_seconds: 300, request_id: ... }';
+
+    snipOtpVerify = '// Step 2: Verify User-Entered OTP\n' +
+      'const res = await fetch(\'' + origin + '/api/v1/otp/verify\', {\n' +
+      '  method: \'POST\',\n' +
+      '  headers: {\n' +
+      '    \'Content-Type\': \'application/json\',\n' +
+      '    \'X-Api-Key\': \'' + key + '\'\n' +
+      '  },\n' +
+      '  body: JSON.stringify({\n' +
+      '    phone: \'' + phone + '\',\n' +
+      '    code: userEnteredCode // e.g. "123456"\n' +
+      '  })\n' +
+      '});\n' +
+      'const data = await res.json();\n' +
+      'if (data.verified) {\n' +
+      '  console.log("Verified successfully!");\n' +
+      '} else {\n' +
+      '  console.error(data.error, data.attempts_left);\n' +
+      '}';
+
+    snipMsgSend = '// Send Standard WhatsApp Notification\n' +
+      'const res = await fetch(\'' + origin + '/api/v1/messages\', {\n' +
+      '  method: \'POST\',\n' +
+      '  headers: {\n' +
+      '    \'Content-Type\': \'application/json\',\n' +
+      '    \'X-Api-Key\': \'' + key + '\'\n' +
+      '  },\n' +
+      '  body: JSON.stringify({\n' +
+      '    recipient: \'' + phone + '\',\n' +
+      '    message: \'Order #9923 confirmed! Thank you for your purchase.\'\n' +
+      '  })\n' +
+      '});\n' +
+      'const data = await res.json();\n' +
+      'console.log(data); // { id: 42, status: "queued" }';
+
+    snipStatus = '// Check Whatsy Server & Connection Health\n' +
+      'const res = await fetch(\'' + origin + '/api/v1/status\');\n' +
+      'const status = await res.json();\n' +
+      'console.log(status); // { whatsapp: "connected", uptime_seconds: ... }';
+  } else if (currentLang === 'py') {
+    snipOtpSend = 'import requests\n\n' +
+      '# Step 1: Send OTP\n' +
+      'url = "' + origin + '/api/v1/otp/send"\n' +
+      'headers = {\n' +
+      '    "X-Api-Key": "' + key + '",\n' +
+      '    "Content-Type": "application/json"\n' +
+      '}\n' +
+      'payload = {\n' +
+      '    "phone": "' + phone + '",\n' +
+      '    "expiry_minutes": 5,\n' +
+      '    "digits": 6\n' +
+      '}\n' +
+      'response = requests.post(url, json=payload, headers=headers)\n' +
+      'print(response.json())';
+
+    snipOtpVerify = 'import requests\n\n' +
+      '# Step 2: Verify Code\n' +
+      'url = "' + origin + '/api/v1/otp/verify"\n' +
+      'headers = {\n' +
+      '    "X-Api-Key": "' + key + '",\n' +
+      '    "Content-Type": "application/json"\n' +
+      '}\n' +
+      'payload = {\n' +
+      '    "phone": "' + phone + '",\n' +
+      '    "code": "123456"\n' +
+      '}\n' +
+      'response = requests.post(url, json=payload, headers=headers)\n' +
+      'print(response.json()) # {"verified": True, ...}';
+
+    snipMsgSend = 'import requests\n\n' +
+      '# Send Standard Message\n' +
+      'url = "' + origin + '/api/v1/messages"\n' +
+      'headers = {\n' +
+      '    "X-Api-Key": "' + key + '",\n' +
+      '    "Content-Type": "application/json"\n' +
+      '}\n' +
+      'payload = {\n' +
+      '    "recipient": "' + phone + '",\n' +
+      '    "message": "Payment received! Thank you."\n' +
+      '}\n' +
+      'response = requests.post(url, json=payload, headers=headers)\n' +
+      'print(response.json())';
+
+    snipStatus = 'import requests\n\n' +
+      'response = requests.get("' + origin + '/api/v1/status")\n' +
+      'print(response.json())';
+  } else if (currentLang === 'php') {
+    snipOtpSend = '<?php\n' +
+      '// Step 1: Send OTP\n' +
+      '$ch = curl_init("' + origin + '/api/v1/otp/send");\n' +
+      'curl_setopt_array($ch, [\n' +
+      '    CURLOPT_POST => true,\n' +
+      '    CURLOPT_RETURNTRANSFER => true,\n' +
+      '    CURLOPT_HTTPHEADER => [\n' +
+      '        "Content-Type: application/json",\n' +
+      '        "X-Api-Key: ' + key + '"\n' +
+      '    ],\n' +
+      '    CURLOPT_POSTFIELDS => json_encode([\n' +
+      '        "phone" => "' + phone + '",\n' +
+      '        "expiry_minutes" => 5,\n' +
+      '        "digits" => 6\n' +
+      '    ])\n' +
+      ']);\n' +
+      '$res = curl_exec($ch);\n' +
+      'curl_close($ch);\n' +
+      'print_r(json_decode($res, true));';
+
+    snipOtpVerify = '<?php\n' +
+      '// Step 2: Verify Code\n' +
+      '$ch = curl_init("' + origin + '/api/v1/otp/verify");\n' +
+      'curl_setopt_array($ch, [\n' +
+      '    CURLOPT_POST => true,\n' +
+      '    CURLOPT_RETURNTRANSFER => true,\n' +
+      '    CURLOPT_HTTPHEADER => [\n' +
+      '        "Content-Type: application/json",\n' +
+      '        "X-Api-Key: ' + key + '"\n' +
+      '    ],\n' +
+      '    CURLOPT_POSTFIELDS => json_encode([\n' +
+      '        "phone" => "' + phone + '",\n' +
+      '        "code" => $userEnteredCode\n' +
+      '    ])\n' +
+      ']);\n' +
+      '$res = curl_exec($ch);\n' +
+      'curl_close($ch);\n' +
+      'print_r(json_decode($res, true));';
+
+    snipMsgSend = '<?php\n' +
+      '// Send WhatsApp Notification\n' +
+      '$ch = curl_init("' + origin + '/api/v1/messages");\n' +
+      'curl_setopt_array($ch, [\n' +
+      '    CURLOPT_POST => true,\n' +
+      '    CURLOPT_RETURNTRANSFER => true,\n' +
+      '    CURLOPT_HTTPHEADER => [\n' +
+      '        "Content-Type: application/json",\n' +
+      '        "X-Api-Key: ' + key + '"\n' +
+      '    ],\n' +
+      '    CURLOPT_POSTFIELDS => json_encode([\n' +
+      '        "recipient" => "' + phone + '",\n' +
+      '        "message" => "New order #4492 placed."\n' +
+      '    ])\n' +
+      ']);\n' +
+      '$res = curl_exec($ch);\n' +
+      'curl_close($ch);\n' +
+      'print_r(json_decode($res, true));';
+
+    snipStatus = '<?php\n' +
+      '$status = file_get_contents("' + origin + '/api/v1/status");\n' +
+      'print_r(json_decode($status, true));';
+  }
+
+  document.getElementById('snip-otp-send').textContent = snipOtpSend;
+  document.getElementById('snip-otp-verify').textContent = snipOtpVerify;
+  document.getElementById('snip-msg-send').textContent = snipMsgSend;
+  document.getElementById('snip-status').textContent = snipStatus;
+}
+
+function copySnippet(id, btn) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(function(){
+    var o = btn.textContent;
+    btn.textContent = '✓ Copied';
+    btn.style.color = 'var(--g)';
+    setTimeout(function(){
+      btn.textContent = o;
+      btn.style.color = '';
+    }, 2000);
+  });
 }
 </script>
 </body>
