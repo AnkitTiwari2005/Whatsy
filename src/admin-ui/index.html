@@ -478,7 +478,7 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
      <button class="btn bp bs" id="search-btn" onclick="loadLogs()"></button>
      <button class="btn bg bs" onclick="clrL()">Clear</button>
     </div>
-    <div class="tw"><div id="lg-w"><div class="emp"><div class="emp-ico">&#128269;</div><p>Click Search to load logs</p></div></div></div>
+    <div class="tw"><div id="lg-w"><div class="emp"><div class="emp-ico"><svg style="width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;opacity:.6" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><p>Click Search to load logs</p></div></div></div>
    </div>
   </div>
 
@@ -568,27 +568,27 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
     <div class="ct" style="margin-bottom:12px">Engine Security Guarantees</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">
      <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">⚡ Priority Queueing</div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span>Priority Queueing</span></div>
       <div style="font-size:.72rem;color:var(--t2)">OTPs jump directly to the front of WhatsApp's outbound queue for sub-second dispatch.</div>
      </div>
      <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">🔒 HMAC-SHA256 Hashing</div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>HMAC-SHA256 Hashing</span></div>
       <div style="font-size:.72rem;color:var(--t2)">Plaintext codes are never stored in SQLite. Only salted one-way hashes reside in database.</div>
      </div>
      <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">⏱️ Timing-Safe Equality</div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Timing-Safe Equality</span></div>
       <div style="font-size:.72rem;color:var(--t2)">Constant-time comparison via crypto.timingSafeEqual() eliminates side-channel timing leaks.</div>
      </div>
      <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">🛡️ 3-Attempt Lockout</div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>3-Attempt Lockout</span></div>
       <div style="font-size:.72rem;color:var(--t2)">Code is permanently locked after 3 failed tries. Brute-force attacks are mathematically impossible.</div>
      </div>
      <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">🚫 60-Second Cooldown</div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg><span>60-Second Cooldown</span></div>
       <div style="font-size:.72rem;color:var(--t2)">Per-phone rate limiter enforces a 60s cooldown to protect from bot spam and SMS costs.</div>
      </div>
      <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px">🔄 Replay Protection</div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg><span>Replay Protection</span></div>
       <div style="font-size:.72rem;color:var(--t2)">Once verified, code status is sealed and cannot be reused or re-verified.</div>
      </div>
     </div>
@@ -922,7 +922,7 @@ async function loadProjs() {
   try {
     var list = await ap('GET','/admin/projects');
     if(!list.length){
-      el.innerHTML = '<div class="emp"><div class="emp-ico">&#128194;</div><p>No projects yet. Create one above.</p></div>';
+      el.innerHTML = '<div class="emp"><div class="emp-ico">' + svgOf('ic-folder') + '</div><p>No projects yet. Create one above.</p></div>';
       return;
     }
     el.innerHTML = list.map(function(p){
@@ -1019,7 +1019,7 @@ async function loadLogs() {
   try {
     var d = await ap('GET','/admin/messages?'+params.toString());
     if(!d.messages.length){
-      el.innerHTML='<div class="emp"><div class="emp-ico">&#128235;</div><p>No messages found</p></div>';
+      el.innerHTML='<div class="emp"><div class="emp-ico">' + svgOf('ic-file') + '</div><p>No messages found</p></div>';
       return;
     }
     el.innerHTML =
@@ -1047,7 +1047,7 @@ async function loadRec() {
   try {
     var d = await ap('GET','/admin/messages?limit=7');
     if(!d.messages.length){
-      el.innerHTML='<div class="emp"><div class="emp-ico">&#128235;</div><p>No messages sent yet</p></div>';
+      el.innerHTML='<div class="emp"><div class="emp-ico">' + svgOf('ic-file') + '</div><p>No messages sent yet</p></div>';
       return;
     }
     var clr = {sent:'var(--g)',queued:'var(--y)',failed:'var(--r)'};
@@ -1213,14 +1213,14 @@ async function verifyOtpTest() {
 
     if (res.ok && data.verified) {
       badge.className = 'bx bx-sent';
-      badge.textContent = 'Verified ✓';
-      el.innerHTML = '<div class="al al-ok" style="margin-top:12px;font-size:.88rem;font-weight:600">'+svgOf('ic-check')+'<span>✓ Phone '+esc(data.phone)+' successfully verified!</span></div>';
+      badge.innerHTML = svgOf('ic-check') + ' Verified';
+      el.innerHTML = '<div class="al al-ok" style="margin-top:12px;font-size:.88rem;font-weight:600">'+svgOf('ic-check')+'<span>Phone '+esc(data.phone)+' successfully verified!</span></div>';
       toast('Verification Successful!', 'ok');
     } else {
       var remaining = data.attempts_left !== undefined ? data.attempts_left : 0;
       if (remaining <= 0) {
         badge.className = 'bx bx-failed';
-        badge.textContent = 'Code Locked 🔒';
+        badge.textContent = 'Code Locked';
         el.innerHTML = '<div class="al al-er" style="margin-top:12px">'+svgOf('ic-x')+'<span>'+esc(data.error)+'</span></div>';
       } else {
         badge.className = 'bx bx-queued';
@@ -1470,7 +1470,7 @@ function copySnippet(id, btn) {
   if (!el) return;
   navigator.clipboard.writeText(el.textContent).then(function(){
     var o = btn.textContent;
-    btn.textContent = '✓ Copied';
+    btn.innerHTML = svgOf('ic-check') + ' Copied';
     btn.style.color = 'var(--g)';
     setTimeout(function(){
       btn.textContent = o;
