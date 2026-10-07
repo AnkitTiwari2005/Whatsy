@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDb = getDb;
+exports.purgeExpiredOtps = purgeExpiredOtps;
 const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
@@ -25,5 +26,23 @@ function getDb() {
     _db.exec(schema);
     logger_1.logger.info({ path: config_1.config.dbPath }, 'Database ready');
     return _db;
+}
+/**
+ * Housekeeping: Purge OTP records that expired more than 24 hours ago.
+ * Keeps SQLite lightweight and prevents indefinite accumulation of expired records.
+ */
+function purgeExpiredOtps() {
+    try {
+        const db = getDb();
+        const result = db.prepare(`DELETE FROM otps WHERE datetime('now', '-24 hours') > expires_at`).run();
+        if (result.changes > 0) {
+            logger_1.logger.info({ purgedCount: result.changes }, 'Purged expired OTP records from database');
+        }
+        return result.changes;
+    }
+    catch (err) {
+        logger_1.logger.error({ err }, 'Failed to purge expired OTP records');
+        return 0;
+    }
 }
 //# sourceMappingURL=index.js.map

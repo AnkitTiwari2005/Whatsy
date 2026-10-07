@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { apiKeyAuth } from './middleware/auth';
 import { getDb, OtpRow } from '../db';
-import { enqueueMessage, getStatus, toJid } from '../whatsapp/client';
+import { getStatus, sendDirectMessage, toJid } from '../whatsapp/client';
 import { config } from '../config';
 import { logger } from '../logger';
 
@@ -10,9 +10,9 @@ export const otpRouter = Router();
 
 // ── Cryptographic Helpers ───────────────────────────────────────────────────
 
-/** One-way HMAC-SHA256 hash using the server secret key as salt */
+/** One-way HMAC-SHA256 hash using the dedicated persistent OTP secret */
 function hashCode(code: string): string {
-  return crypto.createHmac('sha256', config.adminKey).update(code.trim()).digest('hex');
+  return crypto.createHmac('sha256', config.otpSecret).update(code.trim()).digest('hex');
 }
 
 /** Constant-time verification to prevent timing attacks */
@@ -39,6 +39,7 @@ otpRouter.post('/send', apiKeyAuth, async (req: Request, res: Response): Promise
   };
   const project = req.project!;
 
+  // 1. Strict Phone Validation
   if (!phone || typeof phone !== 'string' || phone.trim().length === 0) {
     res.status(400).json({ error: 'phone is required and must be a valid E.164 phone number' });
     return;
@@ -50,22 +51,58 @@ otpRouter.post('/send', apiKeyAuth, async (req: Request, res: Response): Promise
     return;
   }
 
-  const expiryMinutes = Math.min(Math.max(Number(expiry_minutes) || 5, 1), 30);
-  const codeDigits = Math.min(Math.max(Number(digits) || 6, 4), 8);
+  // 2. Strict Integer Validation
+  const rawDigits = digits !== undefined ? Number(digits) : 6;
+  if (!Number.isInteger(rawDigits) || rawDigits < 4 || rawDigits > 8) {
+    res.status(400).json({ error: 'digits must be an integer between 4 and 8' });
+    return;
+  }
+  const codeDigits = rawDigits;
+
+  const rawExpiry = expiry_minutes !== undefined ? Number(expiry_minutes) : 5;
+  if (!Number.isInteger(rawExpiry) || rawExpiry < 1 || rawExpiry > 30) {
+    res.status(400).json({ error: 'expiry_minutes must be an integer between 1 and 30' });
+    return;
+  }
+  const expiryMinutes = rawExpiry;
+
+  // 3. Strict Template Validation
+  if (message_template !== undefined) {
+    if (typeof message_template !== 'string' || !message_template.includes('{code}')) {
+      res.status(400).json({ error: 'message_template must be a string containing the {code} placeholder' });
+      return;
+    }
+    if (message_template.length > 250) {
+      res.status(400).json({ error: 'message_template must not exceed 250 characters' });
+      return;
+    }
+  }
 
   const defaultTemplate = 'Your verification code is: *{code}*. Valid for {minutes} minutes. Please do not share this code with anyone.';
   const template = message_template && typeof message_template === 'string' && message_template.includes('{code}')
     ? message_template
     : defaultTemplate;
 
+  // 4. Verify WhatsApp Gateway Readiness Before Touching Database
+  const { status, is_ready } = getStatus();
+  if (status !== 'connected' || !is_ready) {
+    res.status(503).json({
+      success: false,
+      error: 'WhatsApp gateway is currently disconnected or unavailable. Verification code cannot be dispatched.',
+      whatsapp_status: status,
+    });
+    return;
+  }
+
   const db = getDb();
 
-  // Rate Limiting: 60-second cooldown per phone number for this project
+  // 5. Rate Limiting: 60-second cooldown per phone number for this project
+  // Only applies to currently active, unexpired OTPs with remaining attempts
   const lastOtp = db.prepare(
     `SELECT id, created_at,
             (strftime('%s', 'now') - strftime('%s', created_at)) as elapsed_seconds
      FROM otps
-     WHERE project_id = ? AND phone = ? AND verified = 0
+     WHERE project_id = ? AND phone = ? AND verified = 0 AND attempts_left > 0 AND datetime('now') < expires_at
      ORDER BY id DESC LIMIT 1`
   ).get(project.id, cleanPhone) as { id: number; created_at: string; elapsed_seconds: number } | undefined;
 
@@ -78,72 +115,78 @@ otpRouter.post('/send', apiKeyAuth, async (req: Request, res: Response): Promise
     return;
   }
 
-  // Invalidate any existing active unverified OTPs for this phone number
-  db.prepare(
-    `UPDATE otps SET attempts_left = 0 WHERE project_id = ? AND phone = ? AND verified = 0`
-  ).run(project.id, cleanPhone);
-
-  // Generate cryptographically secure numeric OTP
+  // 6. Generate Cryptographically Secure Numeric OTP
   const minVal = Math.pow(10, codeDigits - 1);
   const maxVal = Math.pow(10, codeDigits) - 1;
   const code = crypto.randomInt(minVal, maxVal + 1).toString();
   const codeHash = hashCode(code);
   const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000).toISOString();
 
-  // Insert into SQLite otps table
-  const otpResult = db.prepare(
-    `INSERT INTO otps (project_id, phone, code_hash, attempts_left, expires_at)
-     VALUES (?, ?, ?, 3, ?)`
-  ).run(project.id, cleanPhone, codeHash, expiresAt);
-
-  const requestId = otpResult.lastInsertRowid as number;
-
-  // Format message text
+  // Format real outbound WhatsApp message
   const body = template
-    .replace('{code}', code)
-    .replace('{minutes}', String(expiryMinutes));
+    .replaceAll('{code}', code)
+    .replaceAll('{minutes}', String(expiryMinutes));
+
+  // Redact code in audit DB to ensure plaintext OTP is NEVER saved in messages or returned via /admin/messages
+  const loggedBody = template
+    .replaceAll('{code}', '******')
+    .replaceAll('{minutes}', String(expiryMinutes));
 
   const formattedPhone = phone.startsWith('+') ? phone : `+${cleanPhone}`;
-  const loggedBody = config.redactBodies ? '[OTP redacted]' : body;
 
-  // Insert message row for audit tracking
-  const msgResult = db.prepare(
-    `INSERT INTO messages (project_id, recipient, body, status)
-     VALUES (?, ?, ?, 'queued')`
-  ).run(project.id, formattedPhone, loggedBody);
-
-  const messageId = msgResult.lastInsertRowid as number;
-
-  const { status } = getStatus();
-  if (status === 'disconnected') {
-    logger.warn({ projectId: project.id, phone: cleanPhone }, 'Queuing OTP message while WhatsApp disconnected');
-  }
-
+  // 7. Synchronous Direct Dispatch Over WhatsApp WebSocket
+  // Bypasses the 2-5s jitter queue. If dispatch throws, previous valid OTP is NOT killed!
+  let waId: string | null = null;
   try {
-    // Priority dispatch: unshift to front of queue
-    enqueueMessage(
-      {
-        messageId,
-        recipient: toJid(cleanPhone),
-        body,
-      },
-      true // priority = true
+    waId = await sendDirectMessage(toJid(cleanPhone), body);
+  } catch (sendErr) {
+    const errMessage = sendErr instanceof Error ? sendErr.message : String(sendErr);
+    logger.error(
+      { projectId: project.id, phone: cleanPhone, error: errMessage },
+      'Failed to deliver OTP via WhatsApp'
     );
-  } catch (err) {
-    const error = err instanceof Error ? err.message : String(err);
-    db.prepare(`UPDATE messages SET status='failed', error=? WHERE id=?`).run(error, messageId);
-    res.status(503).json({ error: `Failed to queue OTP dispatch: ${error}` });
+    res.status(502).json({
+      success: false,
+      error: `Failed to deliver OTP via WhatsApp: ${errMessage}. Please try again.`,
+    });
     return;
   }
 
+  // 8. Atomic Database Update (Only After Successful WhatsApp Delivery)
+  const runTransaction = db.transaction(() => {
+    // Invalidate previous unverified OTPs for this phone number
+    db.prepare(
+      `UPDATE otps SET attempts_left = 0 WHERE project_id = ? AND phone = ? AND verified = 0`
+    ).run(project.id, cleanPhone);
+
+    // Insert new OTP record with salted HMAC hash
+    const otpInsert = db.prepare(
+      `INSERT INTO otps (project_id, phone, code_hash, attempts_left, expires_at)
+       VALUES (?, ?, ?, 3, ?)`
+    ).run(project.id, cleanPhone, codeHash, expiresAt);
+
+    // Insert audit log row with REDACTED body and status='sent'
+    const msgInsert = db.prepare(
+      `INSERT INTO messages (project_id, recipient, body, status, wa_message_id, sent_at)
+       VALUES (?, ?, ?, 'sent', ?, datetime('now'))`
+    ).run(project.id, formattedPhone, loggedBody, waId);
+
+    return {
+      requestId: otpInsert.lastInsertRowid as number,
+      messageId: msgInsert.lastInsertRowid as number,
+    };
+  });
+
+  const { requestId, messageId } = runTransaction();
+
   logger.info(
-    { requestId, messageId, project: project.name, phone: cleanPhone, expiryMinutes },
-    'OTP generated and queued with priority'
+    { requestId, messageId, project: project.name, phone: cleanPhone, waId, expiryMinutes },
+    'OTP delivered successfully via WhatsApp'
   );
 
   res.status(200).json({
     success: true,
-    message: 'OTP sent successfully via WhatsApp',
+    message: 'OTP delivered successfully via WhatsApp',
     phone: formattedPhone,
     expires_in_seconds: expiryMinutes * 60,
     request_id: requestId,
@@ -168,94 +211,96 @@ otpRouter.post('/verify', apiKeyAuth, async (req: Request, res: Response): Promi
 
   const cleanPhone = phone.replace(/\D/g, '');
   const cleanCode = code.trim();
+
   const db = getDb();
 
-  // Find latest OTP record for this project and phone
+  // Find the latest active OTP for this project and phone
   const otpRecord = db.prepare(
-    `SELECT id, project_id, phone, code_hash, attempts_left, verified, expires_at, created_at
+    `SELECT id, code_hash, attempts_left, verified, expires_at
      FROM otps
      WHERE project_id = ? AND phone = ?
      ORDER BY id DESC LIMIT 1`
   ).get(project.id, cleanPhone) as OtpRow | undefined;
 
   if (!otpRecord) {
-    res.status(400).json({
+    logger.warn({ projectId: project.id, phone: cleanPhone }, 'Verification failed: no OTP found');
+    res.status(404).json({
       verified: false,
-      error: 'No verification request found for this phone number',
+      error: 'No active OTP verification code found for this phone number. Please request a new code.',
     });
     return;
   }
 
   if (otpRecord.verified === 1) {
+    logger.warn({ projectId: project.id, phone: cleanPhone, otpId: otpRecord.id }, 'Verification failed: already verified');
     res.status(400).json({
       verified: false,
-      error: 'This verification code has already been used',
+      error: 'This verification code has already been verified and cannot be reused.',
     });
     return;
   }
 
   if (otpRecord.attempts_left <= 0) {
-    res.status(400).json({
+    logger.warn({ projectId: project.id, phone: cleanPhone, otpId: otpRecord.id }, 'Verification failed: locked');
+    res.status(403).json({
       verified: false,
-      error: 'Too many failed attempts. This code is locked. Please request a new code.',
       attempts_left: 0,
+      error: 'This verification code is locked due to too many failed attempts. Please request a new code.',
     });
     return;
   }
 
   const expiresTime = new Date(otpRecord.expires_at).getTime();
   if (Date.now() > expiresTime) {
-    res.status(400).json({
+    logger.warn({ projectId: project.id, phone: cleanPhone, otpId: otpRecord.id }, 'Verification failed: expired');
+    res.status(410).json({
       verified: false,
-      error: 'Verification code has expired. Please request a new code.',
+      error: 'This verification code has expired. Please request a new code.',
     });
     return;
   }
 
-  // Constant-time comparison
+  // Constant-time equality comparison
   const isMatch = verifyCode(cleanCode, otpRecord.code_hash);
 
   if (isMatch) {
-    // Mark verified and close attempts
+    // Mark as verified and burn remaining attempts to prevent reuse
     db.prepare(`UPDATE otps SET verified = 1, attempts_left = 0 WHERE id = ?`).run(otpRecord.id);
 
     logger.info(
       { projectId: project.id, phone: cleanPhone, otpId: otpRecord.id },
-      'OTP verified successfully'
+      'OTP verified successfully via timing-safe check'
     );
 
     res.status(200).json({
       verified: true,
-      message: 'Phone number verified successfully',
+      message: 'Code verified successfully',
       phone: phone.startsWith('+') ? phone : `+${cleanPhone}`,
     });
-    return;
   } else {
-    // Decrement attempts
     const remaining = otpRecord.attempts_left - 1;
     db.prepare(`UPDATE otps SET attempts_left = ? WHERE id = ?`).run(
-      Math.max(0, remaining),
+      remaining,
       otpRecord.id
     );
 
     logger.warn(
-      { projectId: project.id, phone: cleanPhone, attemptsLeft: remaining },
-      'Invalid OTP attempt'
+      { projectId: project.id, phone: cleanPhone, otpId: otpRecord.id, remainingAttempts: remaining },
+      'OTP verification code mismatch'
     );
 
     if (remaining <= 0) {
-      res.status(400).json({
+      res.status(403).json({
         verified: false,
-        error: 'Incorrect code. Maximum attempts reached. Code is now locked.',
         attempts_left: 0,
+        error: 'Incorrect code. Maximum verification attempts exceeded. Code is now permanently locked.',
       });
     } else {
       res.status(400).json({
         verified: false,
-        error: 'Incorrect verification code',
         attempts_left: remaining,
+        error: `Incorrect verification code. ${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining.`,
       });
     }
-    return;
   }
 });

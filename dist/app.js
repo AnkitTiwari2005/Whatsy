@@ -9,6 +9,7 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const path_1 = __importDefault(require("path"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+const logger_1 = require("./logger");
 const adminAuth_1 = require("./api/middleware/adminAuth");
 const messages_1 = require("./api/messages");
 const otp_1 = require("./api/otp");
@@ -53,7 +54,8 @@ function createApp() {
     // 404
     app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
     // Error handler
-    app.use((err, _req, res, _next) => {
+    app.use((err, req, res, _next) => {
+        logger_1.logger.error({ err, path: req.path, method: req.method }, 'Unhandled Express error');
         res.status(500).json({ error: 'Internal server error' });
     });
     return app;

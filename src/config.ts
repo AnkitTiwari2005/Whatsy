@@ -1,4 +1,6 @@
-﻿import path from 'path';
+import path from 'path';
+import fs from 'fs';
+import crypto from 'crypto';
 
 function requireEnv(key: string): string {
   const val = process.env[key];
@@ -24,12 +26,48 @@ function optionalInt(key: string, fallback: number): number {
   return parsed;
 }
 
+const rawAdminKey = requireEnv('ADMIN_KEY');
+if (rawAdminKey.length < 16) {
+  throw new Error('ADMIN_KEY must be at least 16 characters for security.');
+}
+if (rawAdminKey.toLowerCase().includes('change-me')) {
+  throw new Error('ADMIN_KEY is set to an insecure placeholder. Please set a secure random string.');
+}
+
+const resolvedDataDir = path.resolve(optionalEnv('DATA_DIR', './data'));
+
+/**
+ * Dedicated persistent secret for OTP HMAC hashing.
+ * Persisted to DATA_DIR/otp.secret so that rotating ADMIN_KEY does not invalidate pending OTPs.
+ */
+function getOtpSecret(dataDir: string, adminKey: string): string {
+  const envSecret = process.env['OTP_SECRET'];
+  if (envSecret && envSecret.trim().length >= 16) {
+    return envSecret.trim();
+  }
+  const secretFile = path.join(dataDir, 'otp.secret');
+  try {
+    if (fs.existsSync(secretFile)) {
+      const stored = fs.readFileSync(secretFile, 'utf8').trim();
+      if (stored.length >= 32) return stored;
+    }
+    const generated = crypto.randomBytes(32).toString('hex');
+    fs.mkdirSync(dataDir, { recursive: true });
+    fs.writeFileSync(secretFile, generated, { encoding: 'utf8', mode: 0o600 });
+    return generated;
+  } catch {
+    // Deterministic fallback derived from adminKey if file creation fails
+    return crypto.createHmac('sha256', 'whatsy-otp-salt').update(adminKey).digest('hex');
+  }
+}
+
 export const config = {
   port: optionalInt('PORT', 3000),
-  adminKey: requireEnv('ADMIN_KEY'),
+  adminKey: rawAdminKey,
+  otpSecret: getOtpSecret(resolvedDataDir, rawAdminKey),
 
   // Paths — DATA_DIR should point to persistent storage outside deploy dir on Hostinger
-  dataDir: path.resolve(optionalEnv('DATA_DIR', './data')),
+  dataDir: resolvedDataDir,
   get dbPath() { return path.join(this.dataDir, 'whatsy.db'); },
   get authStatePath() { return path.join(this.dataDir, 'auth_state'); },
 

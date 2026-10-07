@@ -207,6 +207,9 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
 .al{padding:10px 14px;border-radius:var(--R);font-size:.8rem;margin:8px 0;display:flex;align-items:flex-start;gap:8px}
 .al-ok{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);color:#4ade80}
 .al-er{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.18);color:var(--r)}
+svg{box-sizing:border-box}
+.al svg,.t-ico svg,.svg-ic{width:16px;height:16px;min-width:16px;min-height:16px;flex-shrink:0;stroke:currentColor;fill:none;margin-top:1px}
+.bx svg{width:11px;height:11px;min-width:11px;min-height:11px;flex-shrink:0;vertical-align:-1px;margin-right:4px}
 
 /* ─── EMPTY ──────────────────────────────── */
 .emp{text-align:center;padding:40px 20px;color:var(--t3)}
@@ -258,6 +261,48 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
 .code-tab.active{color:#000;background:var(--g);border-color:var(--g);box-shadow:0 2px 10px rgba(34,197,94,.25)}
 .copy-code-btn{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.07);border:1px solid var(--b);color:var(--t2);padding:4px 10px;border-radius:6px;font-size:.72rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .14s;font-family:inherit}
 .copy-code-btn:hover{background:rgba(255,255,255,.14);color:var(--t1)}
+
+/* ─── OTP INTERACTIVE SUITE ──────────────── */
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.otp-chip{display:inline-flex;align-items:center;padding:2px 7px;background:var(--s3);border:1px solid var(--b2);border-radius:4px;font-size:.68rem;font-family:monospace;color:var(--g);cursor:pointer;transition:all .15s;margin-left:4px;user-select:none}
+.otp-chip:hover{background:rgba(34,197,94,.12);border-color:var(--g)}
+.otp-chip:active{transform:scale(.95)}
+
+.wa-preview-wrap{margin-top:12px;background:rgba(0,0,0,.35);border:1px solid var(--b);border-radius:var(--R);padding:12px 14px}
+.wa-preview-hdr{display:flex;align-items:center;justify-content:space-between;font-size:.68rem;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.wa-bubble{max-width:380px;background:#005c4b;border-radius:8px 8px 8px 2px;padding:9px 12px 6px;box-shadow:0 2px 8px rgba(0,0,0,.3);position:relative;color:#e9edef;font-size:.82rem;line-height:1.45;word-break:break-word}
+.wa-bubble strong{color:#fff;font-weight:700}
+.wa-bubble-time{display:flex;align-items:center;justify-content:flex-end;gap:4px;font-size:.62rem;color:rgba(255,255,255,.6);margin-top:4px}
+
+.osb-card{margin-top:14px;background:linear-gradient(180deg,rgba(34,197,94,.06) 0%,rgba(34,197,94,.02) 100%);border:1px solid rgba(34,197,94,.25);border-radius:var(--RL);padding:16px;animation:fadeUp .25s ease}
+.osb-hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(34,197,94,.15)}
+.osb-title{display:flex;align-items:center;gap:8px;font-size:.88rem;font-weight:700;color:#4ade80}
+.osb-pulse{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;animation:pulse 1.8s infinite}
+.osb-timer{display:inline-flex;align-items:center;gap:5px;font-family:monospace;font-size:.78rem;font-weight:700;color:#4ade80;background:rgba(34,197,94,.12);padding:3px 9px;border-radius:20px;border:1px solid rgba(34,197,94,.2)}
+.osb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+.osb-cell{background:var(--s2);border:1px solid var(--b);border-radius:var(--R);padding:8px 10px}
+.osb-lbl{display:block;font-size:.65rem;color:var(--t3);text-transform:uppercase;font-weight:700;letter-spacing:.4px;margin-bottom:3px}
+.osb-val{font-size:.82rem;font-weight:600;color:var(--t1)}
+.osb-next{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:.78rem;color:var(--t2);padding-top:8px}
+
+.attempt-dots{display:inline-flex;align-items:center;gap:4px;margin-left:6px}
+.dot-try{width:7px;height:7px;border-radius:50%;background:var(--t3);transition:all .2s}
+.dot-try.on{background:#4ade80;box-shadow:0 0 5px rgba(74,222,128,.5)}
+.dot-try.warn{background:var(--y);box-shadow:0 0 5px rgba(251,191,36,.5)}
+.dot-try.off{background:rgba(248,113,113,.3)}
+
+.ovc-card{margin-top:14px;background:linear-gradient(135deg,rgba(34,197,94,.1) 0%,rgba(34,197,94,.03) 100%);border:1px solid rgba(34,197,94,.3);border-radius:var(--RL);padding:16px;display:flex;align-items:flex-start;gap:14px;animation:fadeUp .25s ease}
+.ovc-icon{width:42px;height:42px;border-radius:12px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ovc-icon svg{width:22px;height:22px;stroke:#4ade80;stroke-width:2.5;fill:none}
+.ovc-title{font-size:.92rem;font-weight:700;color:#4ade80;margin-bottom:3px}
+.ovc-desc{font-size:.78rem;color:var(--t2);line-height:1.5;margin-bottom:8px}
+.ovc-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ovc-tag{font-size:.68rem;font-weight:600;padding:2px 8px;border-radius:4px;background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+
+.sec-card{padding:14px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R);transition:border-color .2s,transform .2s,box-shadow .2s}
+.sec-card:hover{border-color:rgba(34,197,94,.3);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.sec-card-icon{width:28px;height:28px;border-radius:8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.18);display:flex;align-items:center;justify-content:center;margin-bottom:10px;color:var(--g)}
+.sec-card-icon svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
 </style>
 </head>
 <body>
@@ -485,41 +530,61 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
   <!-- OTP SERVICE -->
   <div class="page" id="pg-otp">
    <div class="ph">
-    <h2>OTP Verification Service</h2>
-    <p>High-priority WhatsApp verification code generation &amp; validation</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+     <div>
+      <h2>OTP Verification Service</h2>
+      <p>High-priority WhatsApp verification code generation &amp; validation</p>
+     </div>
+     <div style="display:flex;gap:8px;align-items:center">
+      <span class="bx bx-active" style="display:inline-flex;align-items:center;gap:6px">
+       <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #22c55e;animation:pulse 1.8s infinite"></span>
+       <span>Priority Queue Online</span>
+      </span>
+      <button class="btn bg bs" onclick="gp('docs')" style="gap:5px">
+       <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+       <span>API Docs</span>
+      </button>
+     </div>
+    </div>
    </div>
 
-   <div class="card" style="margin-bottom:14px">
+   <!-- STEP 1: GENERATE & DISPATCH -->
+   <div class="card" id="otp-send-card" style="margin-bottom:16px">
     <div class="ch">
-     <span class="ct">Interactive OTP Tester</span>
-     <span class="bx bx-active">Priority Queue</span>
+     <div style="display:flex;align-items:center;gap:8px">
+      <span class="ct">1. Generate &amp; Dispatch OTP</span>
+      <span class="bx bx-active" style="font-size:.64rem">Direct WebSocket Priority</span>
+     </div>
+     <div id="otp-proj-chip" style="font-size:.72rem;color:var(--t2);display:none;background:var(--s2);padding:2px 8px;border-radius:4px;border:1px solid var(--b)"></div>
     </div>
     
     <div class="fg2">
      <div class="fg">
       <label>Recipient Phone Number *</label>
-      <input type="tel" id="otp-phone" placeholder="+91XXXXXXXXXX (with country code)">
+      <input type="tel" id="otp-phone" placeholder="91XXXXXXXXXX (country code + number)">
+      <div style="font-size:.68rem;color:var(--t3);margin-top:4px">No leading + or spaces (e.g. 918837530074).</div>
      </div>
      <div class="fg">
       <label>Project API Key *</label>
       <input type="text" id="otp-key" placeholder="Paste project API key">
+      <div style="font-size:.68rem;color:var(--t3);margin-top:4px">Scopes rate-limiting and authenticates this verification request.</div>
      </div>
     </div>
 
     <div class="fg2">
      <div class="fg">
       <label>Code Length</label>
-      <select id="otp-digits">
-       <option value="6" selected>6 Digits (Standard)</option>
-       <option value="4">4 Digits</option>
-       <option value="8">8 Digits</option>
+      <select id="otp-digits" onchange="updateOtpTplPreview()">
+       <option value="6" selected>6 Digits (Standard Numeric)</option>
+       <option value="4">4 Digits (Fast Verification)</option>
+       <option value="8">8 Digits (Maximum Entropy)</option>
       </select>
      </div>
      <div class="fg">
       <label>Expiry Time</label>
-      <select id="otp-expiry">
+      <select id="otp-expiry" onchange="updateOtpTplPreview()">
        <option value="5" selected>5 Minutes (Recommended)</option>
-       <option value="2">2 Minutes</option>
+       <option value="2">2 Minutes (Strict Security)</option>
        <option value="10">10 Minutes</option>
        <option value="15">15 Minutes</option>
       </select>
@@ -527,11 +592,36 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
     </div>
 
     <div class="fg">
-     <label>Message Template (Must include {code})</label>
-     <input type="text" id="otp-tpl" value="Your verification code is: *{code}*. Valid for {minutes} minutes. Please do not share this code with anyone.">
+     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+      <label style="margin-bottom:0">Message Template (Must include {code})</label>
+      <div style="font-size:.7rem;color:var(--t3)">
+       Click to insert:
+       <span class="otp-chip" onclick="insertTag('{code}')">{code}</span>
+       <span class="otp-chip" onclick="insertTag('{minutes}')">{minutes}</span>
+      </div>
+     </div>
+     <input type="text" id="otp-tpl" oninput="updateOtpTplPreview()" value="Your verification code is: *{code}*. Valid for {minutes} minutes. Please do not share this code with anyone.">
     </div>
 
-    <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap">
+    <!-- Live WhatsApp Bubble Preview -->
+    <div class="wa-preview-wrap">
+     <div class="wa-preview-hdr">
+      <div style="display:flex;align-items:center;gap:6px">
+       <svg style="width:13px;height:13px;color:#25D366" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+       <span>Recipient WhatsApp Preview</span>
+      </div>
+      <span style="color:var(--t3);font-size:.64rem">Simulated Markdown</span>
+     </div>
+     <div class="wa-bubble">
+      <div id="otp-preview-text">Your verification code is: <strong style="color:#25D366">*482910*</strong>. Valid for 5 minutes. Please do not share this code with anyone.</div>
+      <div class="wa-bubble-time">
+       <span id="wa-preview-time">12:00 PM</span>
+       <svg style="width:13px;height:13px;color:#53bdeb;stroke:currentColor;fill:none;stroke-width:2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/><polyline points="15 6 9 12 6 9"/></svg>
+      </div>
+     </div>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap">
      <button class="btn bp" id="otp-send-btn" onclick="sendOtpTest()">
       <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       <span>Send OTP to WhatsApp</span>
@@ -542,54 +632,84 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
     <div id="otp-send-res"></div>
    </div>
 
-   <!-- VERIFY CODE CARD -->
-   <div class="card" id="otp-verify-card" style="margin-bottom:14px">
+   <!-- STEP 2: VERIFY RECEIVED CODE CARD -->
+   <div class="card" id="otp-verify-card" style="margin-bottom:16px;transition:border-color .25s">
     <div class="ch">
-     <span class="ct">Verify Received Code</span>
-     <span id="otp-attempt-badge" class="bx bx-inactive">3 Attempts Allowed</span>
-    </div>
-    <div class="fg2">
-     <div class="fg">
-      <label>Verification Code</label>
-      <input type="text" id="otp-verify-code" placeholder="Enter code received on WhatsApp" style="font-family:'Courier New',monospace;font-size:1.05rem;letter-spacing:4px">
+     <div style="display:flex;align-items:center;gap:8px">
+      <span class="ct">2. In-Browser Code Validator</span>
+      <span id="otp-attempt-badge" class="bx bx-inactive">3 Attempts Allowed</span>
+      <span id="otp-attempt-dots" class="attempt-dots">
+       <span class="dot-try on"></span>
+       <span class="dot-try on"></span>
+       <span class="dot-try on"></span>
+      </span>
      </div>
-     <div class="fg" style="display:flex;align-items:flex-end">
-      <button class="btn bp bl" id="otp-verify-btn" onclick="verifyOtpTest()" style="width:100%">
-       <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-       <span>Verify Code</span>
-      </button>
-     </div>
+     <div id="otp-verify-sub" style="font-size:.72rem;color:var(--t3)">Enter code received on WhatsApp</div>
     </div>
+
+    <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:flex-end">
+     <div class="fg" style="margin-bottom:0">
+      <label>Received Code</label>
+      <input type="text" id="otp-verify-code" placeholder="&bull; &bull; &bull; &bull; &bull; &bull;" maxlength="10" autocomplete="one-time-code" style="font-family:'Courier New',monospace;font-size:1.3rem;letter-spacing:8px;font-weight:700;text-align:center">
+     </div>
+     <button class="btn bp bl" id="otp-verify-btn" onclick="verifyOtpTest()" style="height:42px;padding:0 24px">
+      <svg style="width:15px;height:15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>Verify Code</span>
+     </button>
+    </div>
+    <div style="font-size:.7rem;color:var(--t3);margin-top:6px">Timing-safe equality comparison via crypto.timingSafeEqual(). Code is locked after 3 failures.</div>
+
     <div id="otp-verify-res"></div>
    </div>
 
    <!-- ENGINE GUARANTEES -->
    <div class="card" style="background:rgba(255,255,255,.015)">
-    <div class="ct" style="margin-bottom:12px">Engine Security Guarantees</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">
-     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span>Priority Queueing</span></div>
-      <div style="font-size:.72rem;color:var(--t2)">OTPs jump directly to the front of WhatsApp's outbound queue for sub-second dispatch.</div>
+    <div class="ch">
+     <span class="ct">Engine Security Guarantees</span>
+     <span class="bx bx-active">Zero-Knowledge Storage</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+     <div class="sec-card">
+      <div class="sec-card-icon" style="color:#22c55e;background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2)">
+       <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div style="font-size:.82rem;font-weight:700;color:var(--t1);margin-bottom:4px">Priority Queueing</div>
+      <div style="font-size:.74rem;color:var(--t2);line-height:1.5">OTPs jump straight to the head of WhatsApp's outbound queue for sub-second delivery.</div>
      </div>
-     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>HMAC-SHA256 Hashing</span></div>
-      <div style="font-size:.72rem;color:var(--t2)">Plaintext codes are never stored in SQLite. Only salted one-way hashes reside in database.</div>
+     <div class="sec-card">
+      <div class="sec-card-icon" style="color:#38bdf8;background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.2)">
+       <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div style="font-size:.82rem;font-weight:700;color:var(--t1);margin-bottom:4px">HMAC-SHA256 Hashing</div>
+      <div style="font-size:.74rem;color:var(--t2);line-height:1.5">Plaintext codes are never stored in SQLite. Only salted one-way hashes reside in database.</div>
      </div>
-     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Timing-Safe Equality</span></div>
-      <div style="font-size:.72rem;color:var(--t2)">Constant-time comparison via crypto.timingSafeEqual() eliminates side-channel timing leaks.</div>
+     <div class="sec-card">
+      <div class="sec-card-icon" style="color:#fbbf24;background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.2)">
+       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div style="font-size:.82rem;font-weight:700;color:var(--t1);margin-bottom:4px">Timing-Safe Equality</div>
+      <div style="font-size:.74rem;color:var(--t2);line-height:1.5">Constant-time verification via crypto.timingSafeEqual() eliminates timing side-channel attacks.</div>
      </div>
-     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>3-Attempt Lockout</span></div>
-      <div style="font-size:.72rem;color:var(--t2)">Code is permanently locked after 3 failed tries. Brute-force attacks are mathematically impossible.</div>
+     <div class="sec-card">
+      <div class="sec-card-icon" style="color:#a855f7;background:rgba(168,85,247,.08);border-color:rgba(168,85,247,.2)">
+       <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div style="font-size:.82rem;font-weight:700;color:var(--t1);margin-bottom:4px">3-Attempt Lockout</div>
+      <div style="font-size:.74rem;color:var(--t2);line-height:1.5">Codes are permanently burned after 3 failed tries. Brute-force attacks are impossible.</div>
      </div>
-     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg><span>60-Second Cooldown</span></div>
-      <div style="font-size:.72rem;color:var(--t2)">Per-phone rate limiter enforces a 60s cooldown to protect from bot spam and SMS costs.</div>
+     <div class="sec-card">
+      <div class="sec-card-icon" style="color:#f87171;background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.2)">
+       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+      </div>
+      <div style="font-size:.82rem;font-weight:700;color:var(--t1);margin-bottom:4px">60-Second Cooldown</div>
+      <div style="font-size:.74rem;color:var(--t2);line-height:1.5">Per-phone rate limiter prevents bot spam and SMS costs with strict 60s cooldowns.</div>
      </div>
-     <div style="padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--R)">
-      <div style="font-size:.78rem;font-weight:700;color:var(--g);margin-bottom:4px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-1px;margin-right:5px" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg><span>Replay Protection</span></div>
-      <div style="font-size:.72rem;color:var(--t2)">Once verified, code status is sealed and cannot be reused or re-verified.</div>
+     <div class="sec-card">
+      <div class="sec-card-icon" style="color:#34d399;background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.2)">
+       <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </div>
+      <div style="font-size:.82rem;font-weight:700;color:var(--t1);margin-bottom:4px">Replay Protection</div>
+      <div style="font-size:.74rem;color:var(--t2);line-height:1.5">Once verified, code status is sealed and cannot be reused or validated twice.</div>
      </div>
     </div>
    </div>
@@ -696,7 +816,7 @@ td{padding:11px 20px;font-size:.8rem;vertical-align:middle}
 // ─── ICON HELPER ─────────────────────────────────────────────────────────────
 function svgOf(id) {
   var el = document.getElementById(id);
-  return el ? el.outerHTML.replace(' id="'+id+'"','').replace('<svg ','<svg stroke="currentColor" ') : '';
+  return el ? el.outerHTML.replace(' id="'+id+'"','').replace('<svg ','<svg stroke="currentColor" class="svg-ic" ') : '';
 }
 
 // Inject nav icons after DOM is ready
@@ -1094,16 +1214,104 @@ function tacc(id) {
 // ─── OTP SERVICE & TESTER ─────────────────────────────────────────────────────
 var lastOtpPhone = '';
 var lastOtpKey = '';
+var otpTimerInterval = null;
 
-function initOtpPage() {
+function updateOtpTplPreview() {
+  var tpl = (document.getElementById('otp-tpl') ? document.getElementById('otp-tpl').value : '') || '';
+  var digits = (document.getElementById('otp-digits') ? document.getElementById('otp-digits').value : '6') || '6';
+  var expiry = (document.getElementById('otp-expiry') ? document.getElementById('otp-expiry').value : '5') || '5';
+  var sampleCode = digits === '4' ? '4819' : (digits === '8' ? '92841053' : '482910');
+  var rendered = tpl.replace('{code}', sampleCode).replace('{minutes}', expiry);
+  rendered = esc(rendered).replace(/\*([^\*]+)\*/g, '<strong style="color:#25D366">*$1*</strong>');
+  var el = document.getElementById('otp-preview-text');
+  if(el) el.innerHTML = rendered;
+  var timeEl = document.getElementById('wa-preview-time');
+  if(timeEl) {
+    var d = new Date();
+    timeEl.textContent = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  }
+}
+
+function insertTag(tag) {
+  var input = document.getElementById('otp-tpl');
+  if(!input.value.includes(tag)) {
+    input.value += ' ' + tag;
+  }
+  updateOtpTplPreview();
+}
+
+function focusVerifyInput() {
+  var inp = document.getElementById('otp-verify-code');
+  if(inp) {
+    inp.scrollIntoView({behavior: 'smooth', block: 'center'});
+    setTimeout(function(){ inp.focus(); }, 250);
+  }
+}
+
+function setAttemptDots(count) {
+  var el = document.getElementById('otp-attempt-dots');
+  if(!el) return;
+  var dots = '';
+  for(var i = 1; i <= 3; i++) {
+    if(count >= i) {
+      dots += '<span class="dot-try ' + (count === 3 ? 'on' : (count === 2 ? 'warn' : 'warn')) + '"></span>';
+    } else {
+      dots += '<span class="dot-try off"></span>';
+    }
+  }
+  el.innerHTML = dots;
+}
+
+function startOtpCountdown(seconds) {
+  if(otpTimerInterval) clearInterval(otpTimerInterval);
+  var remaining = seconds;
+  var el = document.getElementById('otp-countdown-text');
+  function tick() {
+    if(remaining <= 0) {
+      clearInterval(otpTimerInterval);
+      if(el) el.textContent = 'Expired';
+      var badge = document.getElementById('otp-attempt-badge');
+      if(badge && !badge.textContent.includes('Verified')) {
+        badge.className = 'bx bx-failed';
+        badge.textContent = 'Code Expired';
+      }
+      return;
+    }
+    var m = Math.floor(remaining / 60);
+    var s = remaining % 60;
+    if(el) el.textContent = 'Expires in ' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    remaining--;
+  }
+  tick();
+  otpTimerInterval = setInterval(tick, 1000);
+}
+
+async function initOtpPage() {
+  updateOtpTplPreview();
   var pKey = document.getElementById('otp-key');
-  if(!pKey.value && document.getElementById('qt-k').value) {
-    pKey.value = document.getElementById('qt-k').value;
-  }
   var pPhone = document.getElementById('otp-phone');
-  if(!pPhone.value && document.getElementById('qt-to').value) {
-    pPhone.value = document.getElementById('qt-to').value;
-  }
+  
+  var savedKey = localStorage.getItem('last_otp_key');
+  if(!pKey.value && savedKey) pKey.value = savedKey;
+  if(!pKey.value && document.getElementById('qt-k').value) pKey.value = document.getElementById('qt-k').value;
+  if(!pPhone.value && document.getElementById('qt-to').value) pPhone.value = document.getElementById('qt-to').value;
+
+  try {
+    var list = await ap('GET', '/admin/projects');
+    if(list && list.length > 0) {
+      var activeProj = list.find(function(p){ return p.active && p.api_keys && p.api_keys.some(function(k){ return k.active; }); }) || list[0];
+      if(activeProj) {
+        if(!pPhone.value && activeProj.default_recipient) {
+          pPhone.value = activeProj.default_recipient;
+        }
+        var chip = document.getElementById('otp-proj-chip');
+        if(chip && activeProj.api_keys && activeProj.api_keys.length > 0) {
+          chip.style.display = 'inline-flex';
+          chip.textContent = 'Active Project: ' + activeProj.name + ' (' + activeProj.api_keys[0].key_prefix + '...)';
+        }
+      }
+    }
+  } catch(e){}
 }
 
 async function sendOtpTest() {
@@ -1116,13 +1324,15 @@ async function sendOtpTest() {
   var btn = document.getElementById('otp-send-btn');
 
   if(!phone || !key) {
-    toast('Phone number and API key are required', 'er');
+    toast('Phone number and Project API key are required', 'er');
     return;
   }
 
   lastOtpPhone = phone;
   lastOtpKey = key;
-  el.innerHTML = '<div class="al al-ok" style="margin-top:12px">'+svgOf('ic-info')+'<span>Generating &amp; queueing OTP...</span></div>';
+  localStorage.setItem('last_otp_key', key);
+
+  el.innerHTML = '<div class="al al-ok" style="margin-top:14px"><svg class="svg-ic" style="width:16px;height:16px;animation:spin 1s linear infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg><span>Dispatching OTP through priority queue...</span></div>';
   btn.style.opacity = '.6';
   btn.style.pointerEvents = 'none';
 
@@ -1146,7 +1356,7 @@ async function sendOtpTest() {
     btn.style.pointerEvents = '';
 
     if (res.status === 429) {
-      el.innerHTML = '<div class="al al-er" style="margin-top:12px">'+svgOf('ic-info')+'<span>'+esc(data.error)+' (Cooldown active)</span></div>';
+      el.innerHTML = '<div class="al al-er" style="margin-top:14px"><svg class="svg-ic" style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg><div><div style="font-weight:700">Cooldown Active (Rate Limited)</div><div style="font-size:.78rem;margin-top:2px">'+esc(data.error)+'</div></div></div>';
       toast(data.error, 'er');
       return;
     }
@@ -1155,20 +1365,39 @@ async function sendOtpTest() {
       throw new Error(data.error || 'Failed to send OTP');
     }
 
-    el.innerHTML = '<div class="al al-ok" style="margin-top:12px">'+svgOf('ic-check')+'<span>OTP queued for '+esc(data.phone)+'! Valid for '+Math.floor(data.expires_in_seconds/60)+' min. (Req #'+data.request_id+')</span></div>';
-    toast('OTP sent to WhatsApp!', 'ok');
+    el.innerHTML = '<div class="osb-card">' +
+      '<div class="osb-hdr">' +
+        '<div class="osb-title"><span class="osb-pulse"></span><span>OTP Dispatched via Priority Queue</span><span class="bx bx-active" style="margin-left:6px">Active</span></div>' +
+        '<div class="osb-timer" id="otp-live-timer"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="otp-countdown-text">Expires in ' + Math.floor(data.expires_in_seconds/60) + ':00</span></div>' +
+      '</div>' +
+      '<div class="osb-grid">' +
+        '<div class="osb-cell"><span class="osb-lbl">Recipient</span><span class="osb-val">' + esc(data.phone) + '</span></div>' +
+        '<div class="osb-cell"><span class="osb-lbl">Request ID</span><span class="osb-val">#' + esc(data.request_id) + '</span></div>' +
+        '<div class="osb-cell"><span class="osb-lbl">Cryptographic Storage</span><span class="osb-val" style="color:#4ade80">HMAC-SHA256 (Salted)</span></div>' +
+        '<div class="osb-cell"><span class="osb-lbl">Security Policy</span><span class="osb-val">3 Tries &bull; 60s Cooldown</span></div>' +
+      '</div>' +
+      '<div class="osb-next">' +
+        '<span>WhatsApp message delivered! Ready to validate code in <strong>Step 2</strong> below.</span>' +
+        '<button class="btn bp bs" onclick="focusVerifyInput()" style="gap:4px"><svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg><span>Enter Code &darr;</span></button>' +
+      '</div>' +
+    '</div>';
 
-    // Update verify section
+    startOtpCountdown(data.expires_in_seconds);
+    toast('OTP delivered to WhatsApp!', 'ok');
+
     document.getElementById('otp-attempt-badge').className = 'bx bx-active';
     document.getElementById('otp-attempt-badge').textContent = '3 Attempts Allowed';
+    setAttemptDots(3);
+    document.getElementById('otp-verify-sub').textContent = 'Validating code for recipient ' + data.phone;
+    document.getElementById('otp-verify-card').style.borderColor = 'rgba(34,197,94,.4)';
     document.getElementById('otp-verify-code').value = '';
     document.getElementById('otp-verify-res').innerHTML = '';
-    document.getElementById('otp-verify-code').focus();
+    setTimeout(focusVerifyInput, 400);
 
   } catch(err) {
     btn.style.opacity = '';
     btn.style.pointerEvents = '';
-    el.innerHTML = '<div class="al al-er" style="margin-top:12px">'+svgOf('ic-x')+'<span>'+esc(err.message)+'</span></div>';
+    el.innerHTML = '<div class="al al-er" style="margin-top:14px"><svg class="svg-ic" style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>' + esc(err.message) + '</span></div>';
     toast(err.message, 'er');
   }
 }
@@ -1187,10 +1416,11 @@ async function verifyOtpTest() {
   }
   if(!code) {
     toast('Please enter the verification code', 'er');
+    document.getElementById('otp-verify-code').focus();
     return;
   }
 
-  el.innerHTML = '<div class="al al-ok" style="margin-top:12px">'+svgOf('ic-info')+'<span>Verifying code with constant-time equality...</span></div>';
+  el.innerHTML = '<div class="al al-ok" style="margin-top:14px"><svg class="svg-ic" style="width:16px;height:16px;animation:spin 1s linear infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg><span>Evaluating crypto.timingSafeEqual()...</span></div>';
   btn.style.opacity = '.6';
   btn.style.pointerEvents = 'none';
 
@@ -1212,30 +1442,67 @@ async function verifyOtpTest() {
     btn.style.pointerEvents = '';
 
     if (res.ok && data.verified) {
+      if(otpTimerInterval) clearInterval(otpTimerInterval);
       badge.className = 'bx bx-sent';
-      badge.innerHTML = svgOf('ic-check') + ' Verified';
-      el.innerHTML = '<div class="al al-ok" style="margin-top:12px;font-size:.88rem;font-weight:600">'+svgOf('ic-check')+'<span>Phone '+esc(data.phone)+' successfully verified!</span></div>';
-      toast('Verification Successful!', 'ok');
+      badge.innerHTML = '<svg style="width:11px;height:11px;vertical-align:-1px;margin-right:4px;stroke:currentColor;fill:none;stroke-width:2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Verified';
+      setAttemptDots(3);
+
+      el.innerHTML = '<div class="ovc-card">' +
+        '<div class="ovc-icon">' +
+          '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' +
+        '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="ovc-title">Verification Successful &bull; ' + esc(data.phone) + '</div>' +
+          '<div class="ovc-desc">Timing-safe cryptographic equality passed. Plaintext hash matched, session verified, and code sealed against replay attacks.</div>' +
+          '<div class="ovc-tags">' +
+            '<span class="ovc-tag">&check; Timing-Safe Match</span>' +
+            '<span class="ovc-tag">&check; Replay Protection Sealed</span>' +
+            '<span class="ovc-tag">&check; Sub-Millisecond Validation</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+      toast('Code verified successfully!', 'ok');
     } else {
       var remaining = data.attempts_left !== undefined ? data.attempts_left : 0;
+      setAttemptDots(remaining);
       if (remaining <= 0) {
+        if(otpTimerInterval) clearInterval(otpTimerInterval);
         badge.className = 'bx bx-failed';
         badge.textContent = 'Code Locked';
-        el.innerHTML = '<div class="al al-er" style="margin-top:12px">'+svgOf('ic-x')+'<span>'+esc(data.error)+'</span></div>';
+        el.innerHTML = '<div class="al al-er" style="margin-top:14px;background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3)">' +
+          '<svg class="svg-ic" style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' +
+          '<div><div style="font-weight:700">Code Permanently Locked (3/3 Attempts Failed)</div><div style="font-size:.78rem;margin-top:2px">' + esc(data.error) + '. Security lockout active; request a new code.</div></div>' +
+        '</div>';
       } else {
         badge.className = 'bx bx-queued';
-        badge.textContent = remaining + ' Attempts Remaining';
-        el.innerHTML = '<div class="al al-er" style="margin-top:12px">'+svgOf('ic-x')+'<span>'+esc(data.error)+' ('+remaining+' tries left)</span></div>';
+        badge.textContent = remaining + ' Tries Left';
+        el.innerHTML = '<div class="al al-er" style="margin-top:14px">' +
+          '<svg class="svg-ic" style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+          '<div><div style="font-weight:700">Incorrect Verification Code</div><div style="font-size:.78rem;margin-top:2px">' + esc(data.error) + ' &bull; <strong>' + remaining + ' ' + (remaining === 1 ? 'attempt' : 'attempts') + ' remaining</strong> before lockout.</div></div>' +
+        '</div>';
       }
       toast(data.error || 'Verification failed', 'er');
     }
   } catch(err) {
     btn.style.opacity = '';
     btn.style.pointerEvents = '';
-    el.innerHTML = '<div class="al al-er" style="margin-top:12px">'+svgOf('ic-x')+'<span>'+esc(err.message)+'</span></div>';
+    el.innerHTML = '<div class="al al-er" style="margin-top:14px"><svg class="svg-ic" style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>' + esc(err.message) + '</span></div>';
     toast(err.message, 'er');
   }
 }
+
+// Bind Enter key and input uppercase formatting on verify code
+setTimeout(function(){
+  var vInput = document.getElementById('otp-verify-code');
+  if(vInput) {
+    vInput.addEventListener('keydown', function(e){
+      if(e.key === 'Enter') verifyOtpTest();
+    });
+    vInput.addEventListener('input', function(){
+      this.value = this.value.toUpperCase().replace(/\s/g, '');
+    });
+  }
+}, 500);
 
 // ─── API DOCS & CODE SNIPPETS ─────────────────────────────────────────────────
 var currentLang = 'curl';

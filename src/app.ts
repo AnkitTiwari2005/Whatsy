@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
 import rateLimit from 'express-rate-limit';
+import { logger } from './logger';
 
 import { adminKeyAuth } from './api/middleware/adminAuth';
 import { messagesRouter } from './api/messages';
@@ -60,7 +61,8 @@ export function createApp() {
   app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
 
   // Error handler
-  app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    logger.error({ err, path: req.path, method: req.method }, 'Unhandled Express error');
     res.status(500).json({ error: 'Internal server error' });
   });
 

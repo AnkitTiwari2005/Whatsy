@@ -1,9 +1,9 @@
-﻿// Load env vars first — before any other import reads config
+// Load env vars first — before any other import reads config
 import 'dotenv/config';
 
 import { config } from './config';
 import { logger } from './logger';
-import { getDb } from './db';
+import { getDb, purgeExpiredOtps } from './db';
 import { createApp } from './app';
 import { connectWhatsApp } from './whatsapp/client';
 
@@ -12,6 +12,10 @@ async function main() {
 
   // Initialise database (runs schema if needed)
   getDb();
+  purgeExpiredOtps();
+
+  // Housekeeping: periodic purge of expired OTPs every hour
+  setInterval(purgeExpiredOtps, 60 * 60 * 1000);
 
   // Start WhatsApp connection (non-blocking — reconnect handles failures)
   connectWhatsApp().catch((err) => {

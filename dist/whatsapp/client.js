@@ -37,7 +37,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.toJid = toJid;
+exports.isWhatsAppReady = isWhatsAppReady;
 exports.getStatus = getStatus;
+exports.sendDirectMessage = sendDirectMessage;
+exports.loadPendingMessagesFromDb = loadPendingMessagesFromDb;
 exports.connectWhatsApp = connectWhatsApp;
 exports.requestPairing = requestPairing;
 exports.enqueueMessage = enqueueMessage;
@@ -73,10 +76,15 @@ function toJid(phone) {
     const digits = phone.replace(/\D/g, '');
     return `${digits}@s.whatsapp.net`;
 }
+/** Check if WhatsApp socket is open and authenticated */
+function isWhatsAppReady() {
+    return connectionStatus === 'connected' && sock !== null && Boolean(sock.user || sock.authState?.creds?.me);
+}
 function getStatus() {
     return {
         status: connectionStatus,
         uptime_seconds: Math.floor((Date.now() - startedAt.getTime()) / 1000),
+        is_ready: isWhatsAppReady(),
     };
 }
 /** Jitter delay between MESSAGE_DELAY_MIN_MS and MESSAGE_DELAY_MAX_MS */
@@ -89,6 +97,19 @@ function jitterDelay() {
 function backoffDelay(attempt) {
     return Math.min(1000 * Math.pow(2, attempt), 300_000);
 }
+// ── Direct / Synchronous send ─────────────────────────────────────────────────
+/**
+ * Direct synchronous message dispatch over active WebSocket.
+ * Bypasses the 2-5s anti-ban jitter queue for real-time delivery (e.g. OTPs).
+ * Throws if WhatsApp is disconnected or socket error occurs.
+ */
+async function sendDirectMessage(recipientJid, text) {
+    if (connectionStatus !== 'connected' || !sock) {
+        throw new Error('WhatsApp service is disconnected. Cannot deliver message.');
+    }
+    const result = await sock.sendMessage(recipientJid, { text });
+    return result?.key?.id ?? null;
+}
 // ── Message queue drain ───────────────────────────────────────────────────────
 async function drainQueue() {
     if (draining || connectionStatus !== 'connected')
@@ -97,6 +118,15 @@ async function drainQueue() {
     const db = (0, db_1.getDb)();
     while (messageQueue.length > 0 && connectionStatus === 'connected') {
         const msg = messageQueue.shift();
+        // Check if message has expired before attempting delivery
+        if (msg.expiresAt && Date.now() > msg.expiresAt.getTime()) {
+            logger_1.logger.warn({ messageId: msg.messageId, otpId: msg.otpId, expiresAt: msg.expiresAt }, 'Dropping expired message from queue — skipping send');
+            db.prepare(`UPDATE messages SET status='failed', error='Message expired before delivery' WHERE id=?`).run(msg.messageId);
+            if (msg.otpId) {
+                db.prepare(`UPDATE otps SET attempts_left = 0 WHERE id = ?`).run(msg.otpId);
+            }
+            continue;
+        }
         try {
             const result = await sock.sendMessage(msg.recipient, { text: msg.body });
             const waId = result?.key?.id ?? null;
@@ -113,6 +143,32 @@ async function drainQueue() {
         }
     }
     draining = false;
+}
+// ── Database queue recovery ───────────────────────────────────────────────────
+function loadPendingMessagesFromDb() {
+    try {
+        const db = (0, db_1.getDb)();
+        const pending = db.prepare(`SELECT m.id, m.recipient, m.body
+       FROM messages m
+       WHERE m.status = 'queued'
+       ORDER BY m.id ASC LIMIT 100`).all();
+        for (const row of pending) {
+            const alreadyInQueue = messageQueue.some((q) => q.messageId === row.id);
+            if (!alreadyInQueue) {
+                messageQueue.push({
+                    messageId: row.id,
+                    recipient: row.recipient.includes('@') ? row.recipient : toJid(row.recipient),
+                    body: row.body,
+                });
+            }
+        }
+        if (pending.length > 0) {
+            logger_1.logger.info({ count: pending.length }, 'Loaded queued messages from database into memory queue');
+        }
+    }
+    catch (err) {
+        logger_1.logger.error({ err }, 'Failed to load queued messages from database');
+    }
 }
 // ── Core connect function ─────────────────────────────────────────────────────
 async function connectWhatsApp() {
@@ -149,6 +205,7 @@ async function connectWhatsApp() {
             reconnectAttempts = 0;
             logger_1.logger.info('WhatsApp connected');
             logConnectionEvent('CONNECTED', `reconnect_attempts_needed=${reconnectAttempts}`);
+            loadPendingMessagesFromDb();
             setImmediate(() => drainQueue());
             return;
         }

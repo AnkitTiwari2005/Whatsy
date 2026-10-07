@@ -27,6 +27,26 @@ export function getDb(): Database.Database {
   return _db;
 }
 
+/**
+ * Housekeeping: Purge OTP records that expired more than 24 hours ago.
+ * Keeps SQLite lightweight and prevents indefinite accumulation of expired records.
+ */
+export function purgeExpiredOtps(): number {
+  try {
+    const db = getDb();
+    const result = db.prepare(
+      `DELETE FROM otps WHERE datetime('now', '-24 hours') > expires_at`
+    ).run();
+    if (result.changes > 0) {
+      logger.info({ purgedCount: result.changes }, 'Purged expired OTP records from database');
+    }
+    return result.changes;
+  } catch (err) {
+    logger.error({ err }, 'Failed to purge expired OTP records');
+    return 0;
+  }
+}
+
 // ── Typed row shapes ──────────────────────────────────────────────────────────
 
 export interface ProjectRow {
@@ -71,4 +91,3 @@ export interface OtpRow {
   expires_at: string;
   created_at: string;
 }
-

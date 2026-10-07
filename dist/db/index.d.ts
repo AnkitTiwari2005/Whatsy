@@ -1,5 +1,10 @@
 import Database from 'better-sqlite3';
 export declare function getDb(): Database.Database;
+/**
+ * Housekeeping: Purge OTP records that expired more than 24 hours ago.
+ * Keeps SQLite lightweight and prevents indefinite accumulation of expired records.
+ */
+export declare function purgeExpiredOtps(): number;
 export interface ProjectRow {
     id: number;
     name: string;

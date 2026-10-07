@@ -1,6 +1,7 @@
 export declare const config: {
     readonly port: number;
     readonly adminKey: string;
+    readonly otpSecret: string;
     readonly dataDir: string;
     readonly dbPath: string;
     readonly authStatePath: string;

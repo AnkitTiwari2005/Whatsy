@@ -11,6 +11,9 @@ async function main() {
     logger_1.logger.info('Starting Whatsy...');
     // Initialise database (runs schema if needed)
     (0, db_1.getDb)();
+    (0, db_1.purgeExpiredOtps)();
+    // Housekeeping: periodic purge of expired OTPs every hour
+    setInterval(db_1.purgeExpiredOtps, 60 * 60 * 1000);
     // Start WhatsApp connection (non-blocking — reconnect handles failures)
     (0, client_1.connectWhatsApp)().catch((err) => {
         logger_1.logger.warn({ err }, 'Initial WhatsApp connection failed — will retry automatically');
