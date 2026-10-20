@@ -17,7 +17,7 @@ export function createApp() {
   const app = express();
 
   app.use(helmet({ contentSecurityPolicy: false }));
-  app.use(cors({ origin: false }));
+  app.use(cors());
   app.use(express.json({ limit: '64kb' }));
 
   const apiLimiter = rateLimit({

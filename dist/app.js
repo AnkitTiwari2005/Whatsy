@@ -20,7 +20,7 @@ const pair_1 = __importDefault(require("./api/admin/pair"));
 function createApp() {
     const app = (0, express_1.default)();
     app.use((0, helmet_1.default)({ contentSecurityPolicy: false }));
-    app.use((0, cors_1.default)({ origin: false }));
+    app.use((0, cors_1.default)());
     app.use(express_1.default.json({ limit: '64kb' }));
     const apiLimiter = (0, express_rate_limit_1.default)({
         windowMs: 60_000,
