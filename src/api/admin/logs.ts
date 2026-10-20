@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { getDb, MessageRow } from '../../db';
 import { HttpError, isoUtc } from '../../util/http';
+import { normalizePhone } from '../../util/phone';
 import { enqueueMessage, toJid } from '../../whatsapp/client';
 import { REDACTED_BODY } from '../../config';
 
@@ -60,4 +61,51 @@ logsRouter.post('/:id/retry', (req: Request, res: Response): void => {
   try { enqueueMessage({ messageId: m.id, recipient: toJid(m.recipient), body: m.body }); }
   catch (e) { db.prepare(`UPDATE messages SET status='failed', error=? WHERE id=?`).run((e as Error).message, m.id); throw e; }
   res.status(202).json({ id: m.id, status: 'queued' });
+});
+
+// POST /admin/messages/test — send a test WhatsApp message directly from the admin console
+logsRouter.post('/test', (req: Request, res: Response): void => {
+  const { recipient, phone, phone_number, message, project_id } = req.body as {
+    recipient?: unknown;
+    phone?: unknown;
+    phone_number?: unknown;
+    message?: unknown;
+    project_id?: unknown;
+  };
+  if (typeof message !== 'string' || message.trim().length === 0) {
+    throw new HttpError(400, 'invalid_message', 'message is required and must be a non-empty string');
+  }
+  const rawTarget = recipient ?? phone ?? phone_number;
+  if (!rawTarget) {
+    throw new HttpError(400, 'missing_recipient', 'recipient is required');
+  }
+  const p = normalizePhone(rawTarget);
+  if (!p.ok) {
+    throw new HttpError(400, 'invalid_recipient', `recipient ${p.error}`);
+  }
+  const text = message.trim();
+  const db = getDb();
+  let project: { id: number; name: string } | undefined;
+  if (project_id) {
+    project = db.prepare('SELECT id, name FROM projects WHERE id = ?').get(Number(project_id)) as any;
+  }
+  if (!project) {
+    project = db.prepare('SELECT id, name FROM projects ORDER BY id ASC LIMIT 1').get() as any;
+  }
+  if (!project) {
+    throw new HttpError(400, 'no_project', 'No project found. Please create a project first.');
+  }
+
+  const id = db.prepare(`INSERT INTO messages (project_id, recipient, body, status) VALUES (?, ?, ?, 'queued')`)
+    .run(project.id, p.e164, text).lastInsertRowid as number;
+
+  try {
+    enqueueMessage({ messageId: id, recipient: toJid(p.digits), body: text });
+  } catch (err) {
+    const e = err instanceof Error ? err.message : String(err);
+    db.prepare(`UPDATE messages SET status='failed', error=? WHERE id=?`).run(e, id);
+    throw err;
+  }
+
+  res.status(202).json({ id, status: 'queued', recipient: p.e164, project: project.name });
 });

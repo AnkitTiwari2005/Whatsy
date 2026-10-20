@@ -4,6 +4,7 @@ exports.logsRouter = void 0;
 const express_1 = require("express");
 const db_1 = require("../../db");
 const http_1 = require("../../util/http");
+const phone_1 = require("../../util/phone");
 const client_1 = require("../../whatsapp/client");
 const config_1 = require("../../config");
 exports.logsRouter = (0, express_1.Router)();
@@ -81,5 +82,43 @@ exports.logsRouter.post('/:id/retry', (req, res) => {
         throw e;
     }
     res.status(202).json({ id: m.id, status: 'queued' });
+});
+// POST /admin/messages/test — send a test WhatsApp message directly from the admin console
+exports.logsRouter.post('/test', (req, res) => {
+    const { recipient, phone, phone_number, message, project_id } = req.body;
+    if (typeof message !== 'string' || message.trim().length === 0) {
+        throw new http_1.HttpError(400, 'invalid_message', 'message is required and must be a non-empty string');
+    }
+    const rawTarget = recipient ?? phone ?? phone_number;
+    if (!rawTarget) {
+        throw new http_1.HttpError(400, 'missing_recipient', 'recipient is required');
+    }
+    const p = (0, phone_1.normalizePhone)(rawTarget);
+    if (!p.ok) {
+        throw new http_1.HttpError(400, 'invalid_recipient', `recipient ${p.error}`);
+    }
+    const text = message.trim();
+    const db = (0, db_1.getDb)();
+    let project;
+    if (project_id) {
+        project = db.prepare('SELECT id, name FROM projects WHERE id = ?').get(Number(project_id));
+    }
+    if (!project) {
+        project = db.prepare('SELECT id, name FROM projects ORDER BY id ASC LIMIT 1').get();
+    }
+    if (!project) {
+        throw new http_1.HttpError(400, 'no_project', 'No project found. Please create a project first.');
+    }
+    const id = db.prepare(`INSERT INTO messages (project_id, recipient, body, status) VALUES (?, ?, ?, 'queued')`)
+        .run(project.id, p.e164, text).lastInsertRowid;
+    try {
+        (0, client_1.enqueueMessage)({ messageId: id, recipient: (0, client_1.toJid)(p.digits), body: text });
+    }
+    catch (err) {
+        const e = err instanceof Error ? err.message : String(err);
+        db.prepare(`UPDATE messages SET status='failed', error=? WHERE id=?`).run(e, id);
+        throw err;
+    }
+    res.status(202).json({ id, status: 'queued', recipient: p.e164, project: project.name });
 });
 //# sourceMappingURL=logs.js.map

@@ -209,18 +209,54 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && do
 $('#burger').innerHTML = ic('menu'); setEye(false);
 
 /* ═════════════════════════ OVERVIEW ═════════════════════════ */
-var OV = { stats: null };
+var OV = { stats: null, recMessages: [] };
+
+function openMessageModal(m, onRetry) {
+  if (!m) return;
+  dialog({
+    title: 'Message #' + m.id, wide: true,
+    okLabel: m.status === 'failed' ? 'Retry send' : 'Close',
+    cancelLabel: 'Close',
+    hideCancel: m.status !== 'failed',
+    html: '<dl class="dl">' +
+      '<dt>Status</dt><dd>' + badge(m.status) + '</dd>' +
+      '<dt>Project</dt><dd><b>' + esc(m.project_name) + '</b></dd>' +
+      '<dt>Recipient</dt><dd class="mono">' + esc(m.recipient) + ' <button class="btn gh sm" type="button" data-copy="' + esc(m.recipient) + '" style="margin-left:6px;padding:2px 8px;min-height:24px;font-size:.7rem">Copy</button></dd>' +
+      '<dt>Created</dt><dd>' + esc(absTime(m.created_at)) + ' <span class="muted">(' + esc(rel(m.created_at)) + ')</span></dd>' +
+      (m.sent_at ? '<dt>Sent</dt><dd>' + esc(absTime(m.sent_at)) + ' <span class="muted">(' + esc(rel(m.sent_at)) + ')</span></dd>' : '') +
+      (m.wa_message_id ? '<dt>WhatsApp ID</dt><dd class="mono">' + esc(m.wa_message_id) + '</dd>' : '') +
+      (m.error ? '<dt>Error</dt><dd style="color:var(--r);font-weight:600">' + esc(m.error) + '</dd>' : '') +
+      '</dl><div class="row" style="justify-content:space-between;margin-top:14px;margin-bottom:6px"><label style="margin:0">Message Content</label><button class="btn gh sm" type="button" data-copy="' + esc(m.body) + '" style="padding:2px 8px;min-height:24px;font-size:.7rem">' + ic('copy') + 'Copy Text</button></div><div class="code"><pre style="white-space:pre-wrap;word-break:break-word;padding-right:0;color:var(--t1)">' + esc(m.body || '(empty)') + '</pre></div>'
+  }).then(function (ok) {
+    if (ok && m.status === 'failed') {
+      api('POST', '/admin/messages/' + m.id + '/retry', {}).then(function () {
+        toast('Message re-queued for delivery', 'ok');
+        if (onRetry) onRetry();
+      }, function (e) { toast(e.message, 'bad'); });
+    }
+  });
+}
+
 PAGES.overview = {
   mount: function () {
     body(head('Overview', 'Live server status and recent activity') +
       '<div class="grid g3" id="ov-stats"></div>' +
       '<div class="card"><div class="ch"><h2>Recent messages</h2><button class="btn gh sm" type="button" data-act="ov-refresh">' + ic('refresh') + 'Refresh</button></div><div id="ov-rec">' + skeleton(4) + '</div></div>' +
-      '<div class="card"><div class="ch"><h2>Quick test</h2><span class="hint" style="margin:0">Sends a real WhatsApp message. The key is not stored.</span></div>' +
-      '<div class="grid g2"><div class="fg"><label for="qt-to">Recipient</label><input id="qt-to" type="tel" inputmode="tel" autocomplete="off" placeholder="+919876543210"></div>' +
-      '<div class="fg"><label for="qt-k">Project API key</label><input id="qt-k" type="password" autocomplete="off" spellcheck="false" placeholder="Paste a project API key"></div></div>' +
-      '<div class="fg"><label for="qt-m">Message</label><input id="qt-m" type="text" maxlength="1000" placeholder="Hello from Whatsy!"></div>' +
-      '<button class="btn p" id="qt-go" type="button" data-act="qt-send">' + ic('send') + 'Send test</button><div id="qt-r" aria-live="polite"></div></div>');
-    this.onStatus(); loadStats(); loadRec(); every(function () { loadRec(); loadStats(); }, 10000);
+      '<div class="card"><div class="ch"><div><h2>Quick test</h2><div class="hint" style="margin:2px 0 0">Send an instant WhatsApp message directly from admin (no API key needed)</div></div></div>' +
+      '<div class="grid g2"><div class="fg"><label for="qt-to">Recipient phone</label><input id="qt-to" type="tel" inputmode="tel" autocomplete="off" placeholder="9876543210 (10 digits or +91)"></div>' +
+      '<div class="fg"><label for="qt-p">Project</label><select id="qt-p"><option value="">Loading projects…</option></select></div></div>' +
+      '<div class="fg"><label for="qt-m">Message text</label><input id="qt-m" type="text" maxlength="1000" placeholder="Hello from Whatsy!"></div>' +
+      '<button class="btn p" id="qt-go" type="button" data-act="qt-send">' + ic('send') + 'Send test message</button><div id="qt-r" aria-live="polite"></div></div>');
+    this.onStatus();
+    loadStats();
+    loadRec();
+    api('GET', '/admin/projects').then(function (projs) {
+      var s = $('#qt-p'); if (!s) return;
+      s.innerHTML = projs.length ? projs.map(function (p) {
+        return '<option value="' + p.id + '">' + esc(p.name) + (p.default_recipient ? ' (' + esc(p.default_recipient) + ')' : '') + '</option>';
+      }).join('') : '<option value="">No projects yet — create one</option>';
+    }, function () {});
+    every(function () { loadRec(); loadStats(); }, 10000);
   },
   onStatus: function () {
     var el = $('#ov-stats'); if (!el) return;
@@ -231,30 +267,90 @@ PAGES.overview = {
       '<div class="stat"><div class="l">Last 24 hours</div><div class="v">' + (s ? esc(s.sent) : '—') + '<span class="muted" style="font-size:.85rem;font-weight:500"> sent</span></div><div class="s">' + (s ? (s.failed ? '<span style="color:var(--r)">' + esc(s.failed) + ' failed</span> · ' : '') + esc(s.queued) + ' queued' : 'Loading…') + '</div></div>';
   }
 };
-function loadStats() { api('GET', '/admin/messages/stats').then(function (d) { OV.stats = d.last_24h; if (page && page.onStatus) page.onStatus(); }, function () { }); }
-function loadRec() {
-  var el = $('#ov-rec'); if (!el) return;
+function loadStats(cb) {
+  api('GET', '/admin/messages/stats').then(function (d) {
+    OV.stats = d.last_24h;
+    if (page && page.onStatus) page.onStatus();
+  }, function () {}).finally(function () { if (cb) cb(); });
+}
+function loadRec(cb) {
+  var el = $('#ov-rec');
+  if (!el) { if (cb) cb(); return; }
   api('GET', '/admin/messages?limit=7').then(function (d) {
     if (!$('#ov-rec')) return;
+    OV.recMessages = d.messages || [];
     el.innerHTML = d.messages.length ? '<ul class="msg-list">' + d.messages.map(function (m) {
-      return '<li><div class="body"><div class="t" title="' + esc(m.body) + '">' + esc(m.body || '(empty)') + '</div><div class="m">' + esc(m.project_name) + ' → <span class="mono">' + esc(m.recipient) + '</span> · ' + timeTag(m.created_at) + '</div></div>' + badge(m.status) + '</li>';
-    }).join('') + '</ul>' : empty('inbox', 'No messages yet', 'Send a test below or call the API.');
-  }, function (e) { if ($('#ov-rec')) el.innerHTML = errBox(e, 'ov-refresh'); });
+      return '<li class="click" tabindex="0" role="button" data-act="ov-open" data-id="' + m.id + '" title="Click to view full message details">' +
+        '<div class="body"><div class="t">' + esc(m.body || '(empty)') + '</div>' +
+        '<div class="m">' + esc(m.project_name) + ' → <span class="mono">' + esc(m.recipient) + '</span> · ' + timeTag(m.created_at) + '</div></div>' +
+        badge(m.status) +
+      '</li>';
+    }).join('') + '</ul><div class="row mt" style="justify-content:space-between;padding-top:10px;border-top:1px solid var(--line);align-items:center"><span class="hint">Showing ' + d.messages.length + ' latest messages · Click row to inspect</span><a class="btn gh sm" href="#/logs">View all logs →</a></div>' : empty('inbox', 'No messages yet', 'Send a test below or call the API.');
+  }, function (e) {
+    if ($('#ov-rec')) el.innerHTML = errBox(e, 'ov-refresh');
+  }).finally(function () { if (cb) cb(); });
 }
-ACT['ov-refresh'] = function () { loadRec(); loadStats(); };
+ACT['ov-refresh'] = function (btn) {
+  setBusy(btn, true);
+  var icon = btn ? btn.querySelector('svg') : null;
+  if (icon) icon.classList.add('spin');
+  var p1 = new Promise(function (res) { loadStats(res); });
+  var p2 = new Promise(function (res) { loadRec(res); });
+  Promise.all([p1, p2]).finally(function () {
+    setTimeout(function () {
+      if (icon) icon.classList.remove('spin');
+      setBusy(btn, false);
+      toast('Overview refreshed · Up to date', 'ok');
+    }, 350);
+  });
+};
+ACT['ov-open'] = function (el) {
+  var id = Number(el.getAttribute('data-id'));
+  var m = (OV.recMessages || []).filter(function (x) { return x.id === id; })[0];
+  if (!m) {
+    api('GET', '/admin/messages?limit=50').then(function (d) {
+      var found = (d.messages || []).filter(function (x) { return x.id === id; })[0];
+      if (found) openMessageModal(found, function () { loadRec(); loadStats(); });
+    });
+    return;
+  }
+  openMessageModal(m, function () { loadRec(); loadStats(); });
+};
 ACT['qt-send'] = function (btn) {
-  var to = $('#qt-to').value.trim(), key = $('#qt-k').value.trim(), msg = $('#qt-m').value.trim(), out = $('#qt-r');
-  if (!to || !key || !msg) { out.innerHTML = '<div class="alert warn" role="alert">' + ic('info') + '<span>Fill in recipient, API key and message.</span></div>'; return; }
+  var to = $('#qt-to').value.trim(), pid = $('#qt-p') ? $('#qt-p').value : '', msg = $('#qt-m').value.trim(), out = $('#qt-r');
+  if (!to || !msg) {
+    out.innerHTML = '<div class="alert warn" role="alert">' + ic('info') + '<span>Please enter a recipient number and message text.</span></div>';
+    return;
+  }
   setBusy(btn, true); out.innerHTML = '';
-  api('POST', '/api/v1/messages', { message: msg, recipient: to }, { apiKey: key, headers: { 'Idempotency-Key': uuid() } }).then(function (d) {
-    out.innerHTML = '<div class="alert ok" role="status">' + ic('check') + '<span id="qt-st">Queued as #' + esc(d.id) + ' → ' + esc(d.recipient) + '. Waiting for delivery…</span></div>';
-    loadRec(); var n = 0;
-    (function poll() { if (!$('#qt-st')) return; api('GET', '/api/v1/messages/' + d.id, undefined, { apiKey: key }).then(function (m) {
-      if (m.status === 'sent') { $('#qt-st').textContent = 'Sent to WhatsApp (#' + d.id + ').'; loadRec(); }
-      else if (m.status === 'failed') { $('#qt-st').parentNode.className = 'alert bad'; $('#qt-st').textContent = 'Failed: ' + (m.error || 'unknown error'); loadRec(); }
-      else if (++n < 12) setTimeout(poll, 1500); else $('#qt-st').textContent = 'Still queued (#' + d.id + '). Check Message logs.';
-    }, function () { }); })();
-  }, function (e) { out.innerHTML = '<div class="alert bad" role="alert">' + ic('x') + '<span>' + esc(e.message) + '</span></div>'; }).then(function () { setBusy(btn, false); });
+  api('POST', '/admin/messages/test', { message: msg, recipient: to, project_id: pid }).then(function (d) {
+    out.innerHTML = '<div class="alert ok" role="status">' + ic('check') + '<span id="qt-st">Queued as #' + esc(d.id) + ' → ' + esc(d.recipient) + '. Delivering…</span></div>';
+    toast('Test message queued for WhatsApp', 'ok');
+    loadRec(); loadStats();
+    var n = 0;
+    (function poll() {
+      if (!$('#qt-st')) return;
+      api('GET', '/admin/messages?limit=3').then(function (res) {
+        var latest = (res.messages || []).filter(function (x) { return x.id === d.id; })[0];
+        if (latest) {
+          if (latest.status === 'sent') {
+            $('#qt-st').textContent = '✓ Delivered to WhatsApp! (#' + d.id + ')';
+            loadRec(); loadStats();
+          } else if (latest.status === 'failed') {
+            $('#qt-st').parentNode.className = 'alert bad';
+            $('#qt-st').textContent = '✗ Delivery failed: ' + (latest.error || 'unknown error');
+            loadRec(); loadStats();
+          } else if (++n < 12) {
+            setTimeout(poll, 1500);
+          }
+        } else if (++n < 12) {
+          setTimeout(poll, 1500);
+        }
+      }, function () {});
+    })();
+  }, function (e) {
+    out.innerHTML = '<div class="alert bad" role="alert">' + ic('x') + '<span>' + esc(e.message) + '</span></div>';
+  }).finally(function () { setBusy(btn, false); });
 };
 
 /* ═════════════════════════ PAIR ═════════════════════════ */
@@ -301,13 +397,27 @@ ACT['unlink'] = function (btn) {
 var PJ = [];
 PAGES.projects = {
   mount: function () {
-    body(head('Projects', 'Each project has its own API keys and default recipient', '<button class="btn p" type="button" data-act="pj-new">' + ic('folder') + 'New project</button>') + '<div id="pj-list">' + skeleton(4) + '</div>');
+    body(head('Projects', 'Each project has its own API keys and default recipient', '<div class="row"><button class="btn gh sm" type="button" data-act="pj-refresh">' + ic('refresh') + 'Refresh</button><button class="btn p" type="button" data-act="pj-new">' + ic('folder') + 'New project</button></div>') + '<div id="pj-list">' + skeleton(4) + '</div>');
     loadProjects();
   }
 };
 function loadProjects() {
   api('GET', '/admin/projects').then(function (l) { PJ = l; paintProjects(); }, function (e) { var el = $('#pj-list'); if (el) el.innerHTML = errBox(e, 'pj-reload'); });
 }
+ACT['pj-refresh'] = function (btn) {
+  setBusy(btn, true);
+  var icon = btn ? btn.querySelector('svg') : null;
+  if (icon) icon.classList.add('spin');
+  api('GET', '/admin/projects').then(function (l) {
+    PJ = l; paintProjects();
+  }).finally(function () {
+    setTimeout(function () {
+      if (icon) icon.classList.remove('spin');
+      setBusy(btn, false);
+      toast('Projects refreshed', 'ok');
+    }, 350);
+  });
+};
 ACT['pj-reload'] = function () { $('#pj-list').innerHTML = skeleton(4); loadProjects(); };
 function paintProjects() {
   var el = $('#pj-list'); if (!el) return;
@@ -373,6 +483,7 @@ PAGES.logs = {
       '<div class="card"><div class="row" style="margin-bottom:14px"><div style="min-width:150px"><label class="sr-only" for="lf-p">Project</label><select id="lf-p"><option value="">All projects</option></select></div>' +
       '<div class="seg" role="group" aria-label="Status filter">' + [['', 'All'], ['sent', 'Sent'], ['queued', 'Queued'], ['failed', 'Failed']].map(function (s) { return '<button type="button" data-act="lf-status" data-v="' + s[0] + '" aria-pressed="' + (L.status === s[0]) + '">' + s[1] + '</button>'; }).join('') + '</div>' +
       '<div class="grow" style="min-width:160px"><label class="sr-only" for="lf-q">Search</label><input id="lf-q" type="search" placeholder="Search number or text" maxlength="64" value="' + esc(L.q) + '"></div>' +
+      '<button class="btn gh sm" type="button" data-act="lg-refresh">' + ic('refresh') + 'Refresh</button>' +
       '<label class="row" style="margin:0;text-transform:none;letter-spacing:0;font-size:.8rem;font-weight:500;color:var(--t2);cursor:pointer"><input type="checkbox" id="lf-auto" style="width:18px;min-height:18px"' + (L.auto ? ' checked' : '') + '> Auto-refresh</label></div>' +
       '<div id="lg-meta" class="hint" aria-live="polite"></div><div class="tw" id="lg-body">' + skeleton(5) + '</div><div class="row mt" id="lg-more" style="justify-content:center"></div></div>');
     api('GET', '/admin/projects').then(function (l) { var s = $('#lf-p'); if (!s) return; l.forEach(function (p) { var o = document.createElement('option'); o.value = p.name; o.textContent = p.name; if (p.name === L.project) o.selected = true; s.appendChild(o); }); }, function () { });
@@ -393,6 +504,17 @@ function loadLogs(reset, silent) {
   }, function (e) { var b = $('#lg-body'); if (b && (reset && !silent)) b.innerHTML = errBox(e, 'lg-reload'); else if (!silent) toast(e.message, 'bad'); }).then(function () { L.loading = false; });
 }
 ACT['lg-reload'] = function () { loadLogs(true); };
+ACT['lg-refresh'] = function (btn) {
+  setBusy(btn, true);
+  var icon = btn ? btn.querySelector('svg') : null;
+  if (icon) icon.classList.add('spin');
+  loadLogs(true);
+  setTimeout(function () {
+    if (icon) icon.classList.remove('spin');
+    setBusy(btn, false);
+    toast('Logs refreshed', 'ok');
+  }, 350);
+};
 ACT['lf-status'] = function (el) { L.status = el.getAttribute('data-v'); document.querySelectorAll('[data-act=lf-status]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === el)); }); loadLogs(true); };
 function paintLogs() {
   var b = $('#lg-body'); if (!b) return;
@@ -404,13 +526,10 @@ function paintLogs() {
   $('#lg-more').innerHTML = L.more ? '<button class="btn gh" type="button" data-act="lg-more">Load more</button>' : '<span class="hint">End of results</span>';
 }
 ACT['lg-more'] = function (b) { setBusy(b, true); L.loading = false; loadLogs(false); };
-document.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('tr[data-act]')) { e.preventDefault(); e.target.click(); } });
+document.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && (e.target.matches('tr[data-act]') || e.target.matches('li[data-act]'))) { e.preventDefault(); e.target.click(); } });
 ACT['lg-open'] = function (el) {
   var m = L.items.filter(function (x) { return x.id === Number(el.getAttribute('data-id')); })[0]; if (!m) return;
-  dialog({ title: 'Message #' + m.id, wide: true, okLabel: m.status === 'failed' ? 'Retry send' : 'Close', cancelLabel: m.status === 'failed' ? 'Close' : 'Close', hideCancel: m.status !== 'failed',
-    html: '<dl class="dl"><dt>Status</dt><dd>' + badge(m.status) + '</dd><dt>Project</dt><dd>' + esc(m.project_name) + '</dd><dt>To</dt><dd class="mono">' + esc(m.recipient) + '</dd><dt>Created</dt><dd>' + esc(absTime(m.created_at)) + '</dd>' + (m.sent_at ? '<dt>Sent</dt><dd>' + esc(absTime(m.sent_at)) + '</dd>' : '') + (m.wa_message_id ? '<dt>WhatsApp id</dt><dd class="mono">' + esc(m.wa_message_id) + '</dd>' : '') + (m.error ? '<dt>Error</dt><dd style="color:var(--r)">' + esc(m.error) + '</dd>' : '') + '</dl><label>Message</label><div class="code"><pre style="white-space:pre-wrap;padding-right:0;color:var(--t1)">' + esc(m.body) + '</pre></div>' }).then(function (ok) {
-    if (ok && m.status === 'failed') api('POST', '/admin/messages/' + m.id + '/retry', {}).then(function () { toast('Message re-queued', 'ok'); loadLogs(true); }, function (e) { toast(e.message, 'bad'); });
-  });
+  openMessageModal(m, function () { loadLogs(true); });
 };
 
 /* ═════════════════════════ OTP TESTER ═════════════════════════ */
