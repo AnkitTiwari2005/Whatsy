@@ -1,72 +1,67 @@
-﻿import { Router, Request, Response } from 'express';
-import { apiKeyAuth } from './middleware/auth';
-import { getDb } from '../db';
+import { Router, Request, Response } from 'express';
+import { getDb, MessageRow } from '../db';
 import { enqueueMessage, getStatus, toJid } from '../whatsapp/client';
-import { config } from '../config';
+import { config, REDACTED_BODY } from '../config';
 import { logger } from '../logger';
+import { HttpError, isoUtc } from '../util/http';
+import { normalizePhone } from '../util/phone';
 
 export const messagesRouter = Router();
 
-messagesRouter.post('/', apiKeyAuth, async (req: Request, res: Response): Promise<void> => {
-  const { message, recipient } = req.body as { message?: string; recipient?: string };
+const view = (m: MessageRow) => ({
+  id: m.id, status: m.status, recipient: m.recipient, error: m.error,
+  created_at: isoUtc(m.created_at), sent_at: isoUtc(m.sent_at), wa_message_id: m.wa_message_id,
+});
+
+// POST /api/v1/messages  — optional "Idempotency-Key" header makes client retries safe (no duplicate WhatsApp messages).
+messagesRouter.post('/', (req: Request, res: Response): void => {
+  const { message, recipient, phone: phoneAlias, phone_number } = req.body as {
+    message?: unknown;
+    recipient?: unknown;
+    phone?: unknown;
+    phone_number?: unknown;
+  };
   const project = req.project!;
 
-  if (!message || typeof message !== 'string' || message.trim().length === 0) {
-    res.status(400).json({ error: 'message is required and must be a non-empty string' });
-    return;
-  }
+  if (typeof message !== 'string' || message.trim().length === 0) throw new HttpError(400, 'invalid_message', 'message is required and must be a non-empty string');
+  const text = message.trim();
+  if (text.length > config.maxMessageLength) throw new HttpError(400, 'message_too_long', `message must be at most ${config.maxMessageLength} characters (got ${text.length})`);
 
-  const resolvedRecipient = recipient ?? project.default_recipient;
-  if (!resolvedRecipient) {
-    res.status(400).json({
-      error: 'recipient is required — project has no default_recipient configured',
-    });
-    return;
-  }
+  const raw = recipient ?? phoneAlias ?? phone_number ?? project.default_recipient;
+  if (raw === undefined || raw === null || raw === '') throw new HttpError(400, 'missing_recipient', 'recipient is required — this project has no default_recipient configured');
+  const phone = normalizePhone(raw);
+  if (!phone.ok) throw new HttpError(400, 'invalid_recipient', `recipient ${phone.error}`);
 
-  // Basic E.164 sanity check
-  const digits = resolvedRecipient.replace(/\D/g, '');
-  if (digits.length < 7 || digits.length > 15) {
-    res.status(400).json({ error: 'recipient must be a valid phone number (E.164 format)' });
-    return;
-  }
-
-  const { status } = getStatus();
-  if (status === 'disconnected') {
-    logger.warn({ projectId: project.id }, 'Queuing message while WhatsApp disconnected');
-  }
+  const idemKey = req.header('idempotency-key')?.trim();
+  if (idemKey && idemKey.length > 128) throw new HttpError(400, 'invalid_idempotency_key', 'Idempotency-Key must be at most 128 characters');
 
   const db = getDb();
-  const loggedBody = config.redactBodies ? '[redacted]' : message.trim();
-
-  const result = db
-    .prepare(
-      `INSERT INTO messages (project_id, recipient, body, status)
-       VALUES (?, ?, ?, 'queued')`
-    )
-    .run(project.id, resolvedRecipient, loggedBody);
-
-  const messageId = result.lastInsertRowid as number;
-
-  try {
-    enqueueMessage({
-      messageId,
-      recipient: toJid(resolvedRecipient),
-      body: message.trim(),
-    });
-  } catch (err) {
-    const error = err instanceof Error ? err.message : String(err);
-    db.prepare(`UPDATE messages SET status='failed', error=? WHERE id=?`).run(error, messageId);
-    res.status(503).json({ error });
-    return;
+  if (idemKey) {
+    const prior = db.prepare('SELECT * FROM messages WHERE project_id = ? AND idempotency_key = ?').get(project.id, idemKey) as MessageRow | undefined;
+    if (prior) { res.status(200).json({ ...view(prior), project: project.name, idempotent_replay: true }); return; }
   }
 
-  logger.info({ messageId, project: project.name, recipient: resolvedRecipient }, 'Message queued');
+  if (getStatus().status === 'disconnected') logger.warn({ projectId: project.id }, 'Queuing message while WhatsApp disconnected');
 
-  res.status(202).json({
-    id: messageId,
-    status: 'queued',
-    project: project.name,
-    recipient: resolvedRecipient,
-  });
+  const id = db.prepare(`INSERT INTO messages (project_id, recipient, body, status, idempotency_key) VALUES (?, ?, ?, 'queued', ?)`)
+    .run(project.id, phone.e164, config.redactBodies ? REDACTED_BODY : text, idemKey || null).lastInsertRowid as number;
+
+  try {
+    enqueueMessage({ messageId: id, recipient: toJid(phone.digits), body: text });
+  } catch (err) {
+    const e = err instanceof Error ? err.message : String(err);
+    db.prepare(`UPDATE messages SET status='failed', error=? WHERE id=?`).run(e, id);
+    if (err instanceof HttpError) res.set('Retry-After', '30');
+    throw err;
+  }
+
+  logger.info({ messageId: id, project: project.name }, 'Message queued');
+  res.status(202).json({ id, status: 'queued', project: project.name, recipient: phone.e164 });
+});
+
+// GET /api/v1/messages/:id — poll delivery status (scoped to the calling project)
+messagesRouter.get('/:id', (req: Request, res: Response): void => {
+  const row = getDb().prepare('SELECT * FROM messages WHERE id = ? AND project_id = ?').get(Number(req.params.id), req.project!.id) as MessageRow | undefined;
+  if (!row) throw new HttpError(404, 'not_found', 'Message not found');
+  res.json(view(row));
 });

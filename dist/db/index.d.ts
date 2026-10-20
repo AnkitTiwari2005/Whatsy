@@ -1,10 +1,12 @@
 import Database from 'better-sqlite3';
 export declare function getDb(): Database.Database;
-/**
- * Housekeeping: Purge OTP records that expired more than 24 hours ago.
- * Keeps SQLite lightweight and prevents indefinite accumulation of expired records.
- */
+export declare function closeDb(): void;
+/** Cheap liveness probe used by /health. */
+export declare function dbHealthy(): boolean;
+/** Housekeeping: drop OTP rows that expired more than 24h ago. Uses julianday() so ISO ('T…Z') and SQLite formats compare correctly. */
 export declare function purgeExpiredOtps(): number;
+/** Optional retention (MESSAGE_RETENTION_DAYS > 0): delete finished messages older than N days. */
+export declare function purgeOldMessages(): number;
 export interface ProjectRow {
     id: number;
     name: string;
@@ -33,6 +35,7 @@ export interface MessageRow {
     wa_message_id: string | null;
     sent_at: string | null;
     created_at: string;
+    idempotency_key?: string | null;
 }
 export interface OtpRow {
     id: number;

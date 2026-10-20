@@ -1,8 +1,6 @@
-﻿# Whatsy
+# Whatsy
 
 A self-hosted WhatsApp notification gateway. Send WhatsApp messages from any app via a simple REST API.
-
-**Live at:** `https://honeydew-butterfly-241889.hostingersite.com`
 
 ---
 
@@ -22,8 +20,8 @@ Your app  -->  POST /api/v1/messages  -->  WhatsApp
 - **Runtime:** Node.js 20 (TypeScript, compiled to `dist/`)
 - **WhatsApp:** Baileys v7 — phone-number pairing, no QR code
 - **Database:** SQLite (`better-sqlite3`) — WAL mode, persistent at `~/whatsy_data/`
-- **Auth:** bcrypt-hashed API keys (project-scoped) + separate admin key
-- **Admin UI:** Single-page HTML at `/admin/ui` — login screen, sidebar nav, custom modals
+- **Auth:** SHA-256-hashed 256-bit API keys (project-scoped; legacy bcrypt keys still work and upgrade on first use) + separate admin key with lockout
+- **Admin UI:** responsive, keyboard-accessible console at `/admin/ui/` (static files, strict CSP, no external requests)
 
 ---
 
@@ -38,6 +36,9 @@ curl -X POST https://your-server/api/v1/messages \
 ```
 
 Response: `{"id":1,"status":"queued","project":"my-shop","recipient":"+91XXXXXXXXXX"}`
+
+### Safe retries & status
+Send an `Idempotency-Key` header with `POST /api/v1/messages` and a retry returns the original message instead of sending twice. Poll `GET /api/v1/messages/:id` for `queued → sent | failed`. `sent` means WhatsApp's server accepted the message (not that the phone received it).
 
 ### Check status
 ```bash
@@ -77,6 +78,7 @@ curl_exec($ch);
 ### Environment variables
 ```env
 NODE_ENV=production
+TRUST_PROXY=1            # if behind a reverse proxy
 PORT=3000
 ADMIN_KEY=<random 32-byte base64url string>
 DATA_DIR=/absolute/path/to/whatsy_data
@@ -129,8 +131,9 @@ Visit `/admin/ui` — login with your `ADMIN_KEY`.
 - One WhatsApp connection per server (shared across all projects)
 - Messages are queued in SQLite and drained with 2–5 s jitter to avoid rate limiting
 - Persistent data (`auth_state/`, `whatsy.db`, `connection.log`) lives outside the deploy tree — survives all redeployments
-- `dist/` is committed so the server never needs TypeScript installed
-- No PM2 needed — Hostinger's Node.js runner manages the process
+- `dist/` is committed so the server never needs TypeScript installed. After editing `src/` run `npm run build:local` and commit `dist/`; `npm run verify:dist` fails if they drift.
+- Graceful shutdown on SIGTERM/SIGINT (in-flight message finishes). PM2 config is optional (`pm2.config.js`).
+- Tests: `npm run build:local && npm test` (regression suite in `test/`; set `WHATSY_SQLITE_SHIM=1` if `better-sqlite3` cannot be built locally)
 
 ---
 

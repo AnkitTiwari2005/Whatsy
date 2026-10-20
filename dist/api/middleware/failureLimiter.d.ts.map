@@ -1,0 +1,1 @@
+{"version":3,"file":"failureLimiter.d.ts","sourceRoot":"","sources":["../../../src/api/middleware/failureLimiter.ts"],"names":[],"mappings":"AAAA,+GAA+G;AAC/G,qBAAa,cAAc;IAEb,OAAO,CAAC,GAAG;IAAU,OAAO,CAAC,QAAQ;IADjD,OAAO,CAAC,IAAI,CAAmD;gBAC3C,GAAG,EAAE,MAAM,EAAU,QAAQ,EAAE,MAAM;IAGzD,qDAAqD;IACrD,UAAU,CAAC,GAAG,EAAE,MAAM,GAAG,MAAM;IAK/B,IAAI,CAAC,GAAG,EAAE,MAAM,GAAG,IAAI;CAIxB"}

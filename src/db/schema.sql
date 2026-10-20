@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS projects (
 CREATE TABLE IF NOT EXISTS api_keys (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   project_id   INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  key_hash     TEXT    NOT NULL UNIQUE,
+  key_hash     TEXT    NOT NULL UNIQUE,   -- "sha256$<hex>" (current) or a legacy bcrypt hash (upgraded on first use)
   key_prefix   TEXT    NOT NULL,
   label        TEXT,
   active       INTEGER NOT NULL DEFAULT 1,
@@ -46,4 +46,3 @@ CREATE TABLE IF NOT EXISTS otps (
 );
 
 CREATE INDEX IF NOT EXISTS idx_otps_project_phone ON otps(project_id, phone, created_at DESC);
-
