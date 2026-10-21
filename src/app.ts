@@ -65,7 +65,7 @@ export function createApp() {
     message: limitJson(`Rate limit for ${label} exceeded for this project`),
   });
 
-  app.use('/api/v1/status', statusRouter);
+  app.use('/api/v1/status', ipLimiter, statusRouter);
   app.use('/api/v1/messages', ipLimiter, apiKeyAuth, perProject(config.messagesRatePerMin, 'messages'), messagesRouter);
   app.use('/api/v1/otp', ipLimiter, apiKeyAuth, perProject(config.otpRatePerMin, 'OTP'), otpRouter);
 

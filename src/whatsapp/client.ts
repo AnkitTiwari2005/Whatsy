@@ -16,7 +16,11 @@ import { normalizePhone } from '../util/phone';
 
 function logConnectionEvent(event: string, detail?: string): void {
   const line = `${new Date().toISOString()} | ${event}${detail ? ' | ' + detail : ''}\n`;
-  try { fs.appendFileSync(path.join(config.dataDir, 'connection.log'), line); } catch { /* never crash over logging */ }
+  const file = path.join(config.dataDir, 'connection.log');
+  try {
+    try { if (fs.statSync(file).size > 1_000_000) fs.renameSync(file, file + '.1'); } catch { /* no file yet */ }   // keep the log bounded
+    fs.appendFileSync(file, line);
+  } catch { /* never crash over logging */ }
 }
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected';
@@ -33,6 +37,9 @@ let draining = false;
 let lastConnectedAt: Date | null = null;
 let lastDisconnectCode: number | undefined;
 let pairingIssuedAt: Date | null = null;
+let qrSeen = false;                          // true once the current socket finished its handshake (safe to request a pairing code)
+let reconcileTimer: ReturnType<typeof setInterval> | null = null;
+let credsCache: { mtime: number; registered: boolean } | null = null;
 const startedAt = new Date();
 const messageQueue: QueuedMessage[] = [];
 const inFlight = new Set<number>();            // rows currently being sent (still 'queued' in the DB)
@@ -52,8 +59,20 @@ export function isWhatsAppReady(): boolean {
   return connectionStatus === 'connected' && sock !== null && Boolean(sock.user || (sock.authState?.creds as any)?.me);
 }
 
+/** creds.json exists even for a half-finished pairing, so read its real `registered` flag (cached by mtime). */
+function registeredOnDisk(): boolean {
+  try {
+    const f = path.join(config.authStatePath, 'creds.json');
+    const m = fs.statSync(f).mtimeMs;
+    if (credsCache && credsCache.mtime === m) return credsCache.registered;
+    const registered = JSON.parse(fs.readFileSync(f, 'utf8')).registered === true;
+    credsCache = { mtime: m, registered };
+    return registered;
+  } catch { return false; }
+}
+
 export function getStatus() {
-  const registered = Boolean((sock?.authState?.creds as any)?.registered) || fs.existsSync(path.join(config.authStatePath, 'creds.json'));
+  const registered = sock ? Boolean((sock.authState?.creds as any)?.registered) : registeredOnDisk();
   return {
     status: connectionStatus,
     uptime_seconds: Math.floor((Date.now() - startedAt.getTime()) / 1000),
@@ -101,9 +120,11 @@ async function deliver(msg: QueuedMessage): Promise<void> {
     safeDb('mark-sent', () => db.prepare(`UPDATE messages SET status='sent', wa_message_id=?, sent_at=datetime('now') WHERE id=?`).run(waId, msg.messageId));
     logger.info({ messageId: msg.messageId, waId }, 'Message sent');
   } catch (err) {
-    const error = err instanceof Error ? err.message : String(err);
+    const raw = err instanceof Error ? err.message : String(err);
+    // A timed-out send may still have been delivered later, so say so instead of implying a clean failure.
+    const error = /timed out after/.test(raw) ? 'Send timed out — WhatsApp may still have delivered it. Check the phone before retrying.' : raw;
     const attempt = (msg.attempt ?? 0) + 1;
-    if (TRANSIENT.test(error) && attempt < config.sendMaxAttempts) {
+    if (TRANSIENT.test(raw) && attempt < config.sendMaxAttempts) {
       logger.warn({ messageId: msg.messageId, attempt, error }, 'Transient send failure — will retry');
       messageQueue.unshift({ ...msg, attempt });
       await sleep(Math.min(2000 * attempt, 10_000));
@@ -195,13 +216,19 @@ async function doConnect(): Promise<void> {
 
   fs.mkdirSync(config.authStatePath, { recursive: true });
   const { state, saveCreds } = await useMultiFileAuthState(config.authStatePath);
-  const { version } = await fetchLatestBaileysVersion();
+  // Never let a hanging network call wedge the single-flight connect: fall back to the library's bundled version.
+  const latest = await withTimeout(fetchLatestBaileysVersion(), 8000, 'fetchLatestBaileysVersion').catch((err) => {
+    logger.warn({ err: (err as Error).message }, 'Could not fetch latest WhatsApp Web version — using library default');
+    return null;
+  });
   teardownSocket();
+  qrSeen = false;
+  const baileysLog = logger.child({ mod: 'baileys' }, { level: 'warn' }) as any;
 
   const mine = makeWASocket({
-    version,
-    auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, logger as any) },
-    logger: logger.child({ mod: 'baileys' }, { level: 'warn' }) as any,
+    ...(latest && (latest as any).version ? { version: (latest as any).version } : {}),
+    auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, baileysLog) },
+    logger: baileysLog,
     printQRInTerminal: false,
     markOnlineOnConnect: false,
     generateHighQualityLinkPreview: false,
@@ -211,7 +238,7 @@ async function doConnect(): Promise<void> {
 
   mine.ev.on('connection.update', ({ connection, lastDisconnect, qr }) => {
     if (sock !== mine) return;                             // ignore events from superseded sockets
-    if (qr) logger.debug('QR generated (phone-number pairing is used instead)');
+    if (qr) { qrSeen = true; logger.debug('QR generated (phone-number pairing is used instead)'); }
 
     if (connection === 'open') {
       const neededAttempts = reconnectAttempts;
@@ -236,6 +263,11 @@ async function doConnect(): Promise<void> {
         wipeAuthState(); teardownSocket();
         return;
       }
+      if (code === 440) {   // connectionReplaced — another server is using this session; reconnecting would make the two kick each other forever
+        logger.error('WhatsApp session was replaced by another instance (440). Auto-reconnect is paused — run only ONE server per session, then restart or re-pair.');
+        logConnectionEvent('REPLACED', 'code=440 auto-reconnect paused');
+        return;
+      }
       const delay = code === DisconnectReason.restartRequired ? 0 : backoffDelay(reconnectAttempts++);
       logConnectionEvent('DISCONNECTED', `code=${code} reconnect_in=${delay}ms attempt=${reconnectAttempts}`);
       scheduleReconnect(delay);
@@ -257,18 +289,24 @@ export function startWhatsApp(): void {
     scheduleReconnect(backoffDelay(reconnectAttempts++));
   });
   // Reconcile: rows left 'queued' in the DB (e.g. queue was full) get picked up without a restart.
-  setInterval(() => { if (connectionStatus === 'connected') { loadPendingMessagesFromDb(); kickDrain(); } }, 60_000).unref();
+  if (!reconcileTimer) {   // singleton — unlink() calls startWhatsApp() again and must not stack intervals
+    reconcileTimer = setInterval(() => { if (connectionStatus === 'connected') { loadPendingMessagesFromDb(); kickDrain(); } }, 60_000);
+    reconcileTimer.unref();
+  }
 }
 
 // ── Pairing / unlinking ───────────────────────────────────────────────────────
 export async function requestPairing(digits: string): Promise<string> {
   if (connectionStatus === 'connected') throw new HttpError(409, 'already_connected', 'WhatsApp is already connected. Unlink the current session first if you want to pair a different number.');
-  const hadSocket = sock !== null;
-  if (!hadSocket) { await connectWhatsApp(); await sleep(1500); }
+  // A socket left over from a closed connection (QR/pairing window timed out, backoff pending) cannot issue codes — start a fresh one.
+  if (!sock || connectionStatus === 'disconnected') { teardownSocket(); reconnectAttempts = 0; await connectWhatsApp(); }
   if (!sock) throw new HttpError(503, 'socket_unavailable', 'Could not initialise a WhatsApp socket. Try again in a few seconds.');
   if (sock.authState.creds.registered) {
     throw new HttpError(409, 'session_exists', 'A linked session already exists and is reconnecting. Wait a moment, or unlink it to pair again.');
   }
+  // Pairing codes are only accepted after the socket's handshake finished (signalled by the first QR event).
+  for (let waited = 0; !qrSeen && connectionStatus === 'connecting' && sock && waited < 10_000; waited += 200) await sleep(200);
+  if (!sock || !qrSeen) throw new HttpError(503, 'socket_not_ready', 'WhatsApp is not ready to issue a pairing code yet. Try again in a few seconds.');
   logger.info('Requesting pairing code');
   const code = await sock.requestPairingCode(digits);
   pairingIssuedAt = new Date();
@@ -281,7 +319,7 @@ export async function unlinkSession(): Promise<void> {
   teardownSocket(); wipeAuthState();
   connectionStatus = 'disconnected'; pairingIssuedAt = null; reconnectAttempts = 0;
   logConnectionEvent('UNLINKED', 'session removed by admin');
-  setTimeout(() => startWhatsApp(), 500).unref();
+  setTimeout(() => { if (!stopped) startWhatsApp(); }, 500).unref();
 }
 
 // ── Queue API ─────────────────────────────────────────────────────────────────
@@ -297,6 +335,7 @@ export function enqueueMessage(msg: QueuedMessage, priority = false): void {
 export async function closeWhatsApp(maxMs = 8000): Promise<void> {
   stopped = true;
   if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+  if (reconcileTimer) { clearInterval(reconcileTimer); reconcileTimer = null; }
   const until = Date.now() + maxMs;
   while (inFlight.size > 0 && Date.now() < until) await sleep(100);
   teardownSocket();

@@ -81,7 +81,7 @@ function dialog(o) {
     wrap.addEventListener('click', function (e) { var b = e.target.closest('[data-d]'); if (!b) return; if (b.getAttribute('data-d') === 'ok') ok(); else close(null); var c = e.target.closest('[data-copy]'); });
     wrap.addEventListener('click', function (e) { var c = e.target.closest('[data-copy]'); if (c) copy(c.getAttribute('data-copy'), 'Copied'); });
     modalOpen = { close: close };
-    var first = box.querySelector('[data-field]') || box.querySelector('[data-d=ok]'); if (first) first.focus();
+    var first = box.querySelector('[data-field]') || (o.danger && box.querySelector('[data-d=cancel]')) || box.querySelector('[data-d=ok]'); if (first) first.focus();   // destructive prompts default to Cancel so a stray Enter cannot revoke/unlink
     if (o.onOpen) o.onOpen(box);
   });
 }
@@ -143,17 +143,19 @@ function doLogin() {
 }
 
 /* ───────── status polling (pauses when tab hidden, backs off when offline) ───────── */
-var S = { status: 'connecting', offline: false, registered: true, queue_length: 0, uptime_seconds: 0 }, pollTimer = null, pollFails = 0, lastOk = 0;
+var S = { status: 'connecting', offline: false, registered: true, queue_length: 0, uptime_seconds: 0 }, pollTimer = null, pollFails = 0, lastOk = 0, pollBusy = false;
 function norm(d) { d.offline = false; return d; }
 function startPolling() { stopPolling(); pollNow(); }
 function stopPolling() { clearTimeout(pollTimer); pollTimer = null; }
 function pollNow() {
+  if (pollBusy) return;   // an in-flight poll already schedules the next one; a second chain would double the traffic every visibility change
   clearTimeout(pollTimer);
   if (!KEY) return;
   if (document.hidden) { pollTimer = setTimeout(pollNow, 3000); return; }
+  pollBusy = true;
   api('GET', '/admin/pair/status', undefined, { timeout: 8000 }).then(function (d) { pollFails = 0; lastOk = Date.now(); S = norm(d); }, function (e) {
     pollFails++; if (pollFails >= 2) S.offline = true; if (e.code === 'timeout' || e.code === 'network') S.offlineReason = e.message;
-  }).then(function () { paintStatus(); if (page && page.onStatus) page.onStatus(); pollTimer = setTimeout(pollNow, S.offline ? Math.min(15000, 3000 * pollFails) : 5000); });
+  }).then(function () { pollBusy = false; paintStatus(); if (page && page.onStatus) page.onStatus(); if (KEY) pollTimer = setTimeout(pollNow, S.offline ? Math.min(15000, 3000 * pollFails) : 5000); });
 }
 document.addEventListener('visibilitychange', function () { if (!document.hidden && KEY) pollNow(); });
 window.addEventListener('online', function () { if (KEY) pollNow(); });
@@ -330,23 +332,18 @@ ACT['qt-send'] = function (btn) {
     var n = 0;
     (function poll() {
       if (!$('#qt-st')) return;
-      api('GET', '/admin/messages?limit=3').then(function (res) {
-        var latest = (res.messages || []).filter(function (x) { return x.id === d.id; })[0];
-        if (latest) {
-          if (latest.status === 'sent') {
-            $('#qt-st').textContent = '✓ Delivered to WhatsApp! (#' + d.id + ')';
-            loadRec(); loadStats();
-          } else if (latest.status === 'failed') {
-            $('#qt-st').parentNode.className = 'alert bad';
-            $('#qt-st').textContent = '✗ Delivery failed: ' + (latest.error || 'unknown error');
-            loadRec(); loadStats();
-          } else if (++n < 12) {
-            setTimeout(poll, 1500);
-          }
-        } else if (++n < 12) {
-          setTimeout(poll, 1500);
-        }
-      }, function () {});
+      api('GET', '/admin/messages/' + d.id).then(function (latest) {
+        var st = $('#qt-st'); if (!st) return;   // navigated away
+        if (latest.status === 'sent') {
+          st.textContent = '✓ Sent — accepted by WhatsApp (#' + d.id + ')';
+          loadRec(); loadStats();
+        } else if (latest.status === 'failed') {
+          st.parentNode.className = 'alert bad';
+          st.textContent = '✗ Delivery failed: ' + (latest.error || 'unknown error');
+          loadRec(); loadStats();
+        } else if (++n < 20) setTimeout(poll, 1500);
+        else st.textContent = 'Still queued after 30s — check Message logs.';
+      }, function () { if (++n < 20) setTimeout(poll, 2000); });
     })();
   }, function (e) {
     out.innerHTML = '<div class="alert bad" role="alert">' + ic('x') + '<span>' + esc(e.message) + '</span></div>';
@@ -357,14 +354,18 @@ ACT['qt-send'] = function (btn) {
 var P = { code: null, issued: 0, mode: '', phone: '' };
 function pairMode() { if (S.status === 'connected') return 'connected'; if (P.code) return 'code'; if (S.registered && !S.offline) return 'existing'; return 'phone'; }
 PAGES.pair = {
-  mount: function () { P.mode = ''; this.onStatus(); every(tickPair, 1000); },
-  onStatus: function () { if (!$('#view')) return; var m = pairMode(); if (m === 'connected' && P.code) { P.code = null; toast('WhatsApp linked successfully', 'ok'); } if (m !== P.mode) { P.mode = m; renderPair(m); } else if (m === 'connected' || m === 'existing') renderPair(m); }
+  mount: function () { P.mode = ''; P.sig = ''; this.onStatus(); every(tickPair, 1000); },
+  onStatus: function () {
+    var m = pairMode(); if (m === 'connected' && P.code) { P.code = null; toast('WhatsApp linked successfully', 'ok'); }
+    var sig = [S.status, S.queue_length, S.last_connected_at, S.last_disconnect_code].join('|');
+    if (m !== P.mode || ((m === 'connected' || m === 'existing') && sig !== P.sig)) { P.mode = m; P.sig = sig; renderPair(m); }   // re-rendering on every poll destroyed keyboard focus
+  }
 };
 function stepsHtml(n) { return '<div class="steps" aria-label="Pairing progress">' + ['Phone number', 'Enter code', 'Connected'].map(function (t, i) { var c = i + 1 < n ? 'done' : i + 1 === n ? 'now' : ''; return '<div class="step ' + c + '"' + (c === 'now' ? ' aria-current="step"' : '') + '><i>' + (c === 'done' ? '✓' : i + 1) + '</i><br>' + t + '</div>'; }).join('') + '</div>'; }
 function renderPair(m) {
   var h = head('Pair WhatsApp', 'Link a dedicated WhatsApp number to send messages');
   if (m === 'connected') h += stepsHtml(4) + '<div class="card"><div class="alert ok">' + ic('check') + '<span><b>WhatsApp is connected.</b> Messages will be delivered normally.</span></div><dl class="dl"><dt>Status</dt><dd>Connected' + (S.last_connected_at ? ' · ' + timeTag(S.last_connected_at) : '') + '</dd><dt>Queue</dt><dd>' + esc(S.queue_length || 0) + ' waiting</dd></dl><p class="hint">To switch to a different number, unlink first, then pair again. Unlinking logs this server out of WhatsApp.</p><div class="row mt"><button class="btn gh sm" type="button" data-act="view-conn-log">' + ic('file') + 'View Connection Log</button><button class="btn d sm" type="button" data-act="unlink">Unlink this number</button></div></div>';
-  else if (m === 'existing') h += '<div class="card"><div class="alert warn">' + ic('warn') + '<span>' + (S.last_disconnect_code === 401 ? 'WhatsApp logged this device out.' : 'A linked session exists but WhatsApp is <b>' + esc(S.status) + '</b>.') + ' It will reconnect automatically. If it stays disconnected, unlink and pair again.</span></div><div class="row mt"><button class="btn gh sm" type="button" data-act="view-conn-log">' + ic('file') + 'View Connection Log</button><button class="btn d sm" type="button" data-act="unlink">Unlink &amp; start over</button></div></div>';
+  else if (m === 'existing') h += '<div class="card"><div class="alert warn">' + ic('warn') + '<span>' + (S.last_disconnect_code === 401 ? 'WhatsApp logged this device out.' : S.last_disconnect_code === 440 ? 'This session was opened on another server, so this one paused reconnecting. Run one server per session, then restart it.' : 'A linked session exists but WhatsApp is <b>' + esc(S.status) + '</b>.') + ' It will reconnect automatically. If it stays disconnected, unlink and pair again.</span></div><div class="row mt"><button class="btn gh sm" type="button" data-act="view-conn-log">' + ic('file') + 'View Connection Log</button><button class="btn d sm" type="button" data-act="unlink">Unlink &amp; start over</button></div></div>';
   else if (m === 'code') h += stepsHtml(2) + '<div class="card"><p>On your phone open <b>WhatsApp → Settings → Linked devices → Link a device → Link with phone number instead</b>, then enter this code:</p><div class="paircode" id="pc" aria-label="Pairing code">' + esc(P.code) + '</div><div class="row"><button class="btn gh" type="button" data-act="pair-copy">' + ic('copy') + 'Copy code</button><button class="btn gh" type="button" data-act="pair-new">Request a new code</button><button class="btn gh" type="button" data-act="pair-cancel">Use another number</button></div><p class="hint mt" id="pc-age" aria-live="off"></p><p class="hint">This page updates by itself the moment WhatsApp links the device. Codes expire quickly — if WhatsApp rejects it, request a new one.</p></div>';
   else h += stepsHtml(1) + '<div class="card"><div class="fg"><label for="pp">WhatsApp number to link</label><input id="pp" type="tel" inputmode="tel" autocomplete="off" placeholder="919876543210" aria-describedby="pp-h"><div class="hint" id="pp-h">Country code + number. Spaces, + and dashes are fine. Use a dedicated number, not your personal one.</div></div><button class="btn p" id="pair-go" type="button" data-act="pair-go">' + ic('phone') + 'Get pairing code</button><div id="pair-err" aria-live="assertive"></div></div>';
   body(h); tickPair();
@@ -468,7 +469,7 @@ ACT['pj-edit'] = function (el) {
   });
 };
 ACT['pj-key'] = function (el) {
-  var p = byId(el.getAttribute('data-id'));
+  var p = byId(el.getAttribute('data-id')); if (!p) return;
   dialog({ title: 'New API key', okLabel: 'Create key', fields: true, html: '<div class="fg"><label for="nk-l">Label (optional)</label><input id="nk-l" data-field="label" maxlength="64" placeholder="production" autocomplete="off"></div>' }).then(function (v) {
     if (!v) return;
     api('POST', '/admin/projects/' + p.id + '/keys', { label: v.label || null }).then(function (d) { loadProjects(); return revealKey('New key for “' + p.name + '”', d.api_key); }, function (e) { toast(e.message, 'bad'); });
@@ -481,14 +482,14 @@ ACT['pj-revoke'] = function (el) {
   });
 };
 ACT['pj-toggle'] = function (el) {
-  var p = byId(el.getAttribute('data-id')), to = !p.active;
+  var p = byId(el.getAttribute('data-id')); if (!p) return; var to = !p.active;
   dialog({ title: (to ? 'Activate “' : 'Deactivate “') + p.name + '”?', html: to ? 'Its API keys will start working again.' : 'All of its API keys stop working immediately. Queued messages are still delivered.', okLabel: to ? 'Activate' : 'Deactivate', danger: !to }).then(function (ok) {
     if (ok) api('PATCH', '/admin/projects/' + p.id, { active: to }).then(function () { toast('Project ' + (to ? 'activated' : 'deactivated'), 'ok'); loadProjects(); }, function (e) { toast(e.message, 'bad'); });
   });
 };
 
 /* ═════════════════════════ LOGS ═════════════════════════ */
-var L = { project: '', status: '', q: '', items: [], total: 0, more: false, auto: false, loading: false };
+var L = { project: '', status: '', q: '', items: [], total: 0, more: false, auto: false, loading: false, seq: 0 };
 PAGES.logs = {
   mount: function () {
     body(head('Message logs', 'Every message sent through Whatsy') +
@@ -502,18 +503,19 @@ PAGES.logs = {
     $('#lf-p').addEventListener('change', function () { L.project = this.value; loadLogs(true); });
     var t; $('#lf-q').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(t); t = setTimeout(function () { L.q = v; loadLogs(true); }, 350); });
     $('#lf-auto').addEventListener('change', function () { L.auto = this.checked; });
-    every(function () { if (L.auto && !modalOpen) loadLogs(true, true); }, 8000);
+    every(function () { if (L.auto && !modalOpen && !L.loading && L.items.length <= 50) loadLogs(true, true); }, 8000);   // never wipe pages the user already loaded
     loadLogs(true);
   }
 };
 function qs(extra) { var p = new URLSearchParams({ limit: '50' }); if (L.project) p.set('project', L.project); if (L.status) p.set('status', L.status); if (L.q) p.set('q', L.q); Object.keys(extra || {}).forEach(function (k) { p.set(k, extra[k]); }); return p.toString(); }
 function loadLogs(reset, silent) {
-  if (L.loading) return; L.loading = true;
+  var seq = ++L.seq; L.loading = true;
   var extra = !reset && L.items.length ? { before_id: L.items[L.items.length - 1].id } : {};
   if (reset && !silent) { var b = $('#lg-body'); if (b) b.innerHTML = skeleton(5); }
   api('GET', '/admin/messages?' + qs(extra)).then(function (d) {
+    if (seq !== L.seq) return;   // a newer filter/search superseded this request
     L.items = reset ? d.messages : L.items.concat(d.messages); L.total = d.total; L.more = d.has_more; paintLogs();
-  }, function (e) { var b = $('#lg-body'); if (b && (reset && !silent)) b.innerHTML = errBox(e, 'lg-reload'); else if (!silent) toast(e.message, 'bad'); }).then(function () { L.loading = false; });
+  }, function (e) { if (seq !== L.seq) return; var b = $('#lg-body'); if (b && (reset && !silent)) b.innerHTML = errBox(e, 'lg-reload'); else if (!silent) toast(e.message, 'bad'); }).then(function () { if (seq === L.seq) L.loading = false; });
 }
 ACT['lg-reload'] = function () { loadLogs(true); };
 ACT['lg-refresh'] = function (btn) {
@@ -537,7 +539,7 @@ function paintLogs() {
   }).join('') + '</tbody></table>';
   $('#lg-more').innerHTML = L.more ? '<button class="btn gh" type="button" data-act="lg-more">Load more</button>' : '<span class="hint">End of results</span>';
 }
-ACT['lg-more'] = function (b) { setBusy(b, true); L.loading = false; loadLogs(false); };
+ACT['lg-more'] = function (b) { setBusy(b, true); loadLogs(false); };
 document.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && (e.target.matches('tr[data-act]') || e.target.matches('li[data-act]'))) { e.preventDefault(); e.target.click(); } });
 ACT['lg-open'] = function (el) {
   var m = L.items.filter(function (x) { return x.id === Number(el.getAttribute('data-id')); })[0]; if (!m) return;
@@ -630,7 +632,7 @@ function snippets(o, lang) {
     var u = o + c[2], b = c[3], idem = c[4], s;
     if (lang === 'curl') s = "curl -X POST '" + u + "' \\\n  -H 'X-Api-Key: " + K + "' \\\n  -H 'Content-Type: application/json' \\\n" + (idem ? "  -H 'Idempotency-Key: order-1234-shipped' \\\n" : '') + "  -d '" + J(b) + "'";
     else if (lang === 'js') s = "const res = await fetch(" + J(u) + ", {\n  method: 'POST',\n  headers: {\n    'X-Api-Key': process.env.WHATSY_API_KEY, // " + K + "\n    'Content-Type': 'application/json',\n" + (idem ? "    'Idempotency-Key': 'order-1234-shipped',\n" : '') + "  },\n  body: JSON.stringify(" + J(b) + "),\n});\nconst data = await res.json(); // check res.status: 202/200 ok, 4xx = your request, 5xx/503 = retry later";
-    else if (lang === 'py') s = "import os, requests\n\nres = requests.post(\n    " + J(u) + ",\n    headers={'X-Api-Key': os.environ['WHATSY_API_KEY']" + (idem ? ", 'Idempotency-Key': 'order-1234-shipped'" : '') + "},\n    json=" + J(b).replace(/true/g, 'True') + ",\n    timeout=20,\n)\nprint(res.status_code, res.json())";
+    else if (lang === 'py') s = "import os, requests\n\nres = requests.post(\n    " + J(u) + ",\n    headers={'X-Api-Key': os.environ['WHATSY_API_KEY']" + (idem ? ", 'Idempotency-Key': 'order-1234-shipped'" : '') + "},\n    json=" + J(b) + ",\n    timeout=20,\n)\nprint(res.status_code, res.json())";
     else s = "<?php\n$ch = curl_init(" + J(u).replace(/\\\//g, '/') + ");\ncurl_setopt_array($ch, [\n  CURLOPT_POST => true,\n  CURLOPT_RETURNTRANSFER => true,\n  CURLOPT_TIMEOUT => 20,\n  CURLOPT_HTTPHEADER => [\n    'X-Api-Key: ' . getenv('WHATSY_API_KEY'),\n    'Content-Type: application/json',\n" + (idem ? "    'Idempotency-Key: order-1234-shipped',\n" : '') + "  ],\n  CURLOPT_POSTFIELDS => json_encode(" + J(b).replace(/\{/g, '[').replace(/\}/g, ']').replace(/":/g, '" =>') + "),\n]);\n$body = json_decode(curl_exec($ch), true);\n$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);";
     return [c[0], c[1], s];
   });

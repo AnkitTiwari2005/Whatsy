@@ -35,6 +35,10 @@ exports.messagesRouter.post('/', (req, res) => {
     if (idemKey) {
         const prior = db.prepare('SELECT * FROM messages WHERE project_id = ? AND idempotency_key = ?').get(project.id, idemKey);
         if (prior) {
+            // Same key + different payload is a client bug; silently returning the old message would hide it.
+            if (prior.recipient !== phone.e164 || (prior.body !== config_1.REDACTED_BODY && prior.body !== text)) {
+                throw new http_1.HttpError(409, 'idempotency_conflict', 'This Idempotency-Key was already used with a different message or recipient');
+            }
             res.status(200).json({ ...view(prior), project: project.name, idempotent_replay: true });
             return;
         }
@@ -48,7 +52,8 @@ exports.messagesRouter.post('/', (req, res) => {
     }
     catch (err) {
         const e = err instanceof Error ? err.message : String(err);
-        db.prepare(`UPDATE messages SET status='failed', error=? WHERE id=?`).run(e, id);
+        // Release the idempotency key: a client retrying after this 503 must get a fresh attempt, not the failed row back forever.
+        db.prepare(`UPDATE messages SET status='failed', error=?, idempotency_key=NULL WHERE id=?`).run(e, id);
         if (err instanceof http_1.HttpError)
             res.set('Retry-After', '30');
         throw err;

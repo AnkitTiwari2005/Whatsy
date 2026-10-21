@@ -235,3 +235,47 @@ describe('R. Queue & connection reliability', () => {
     assert.equal(r.code, 0, 'exit: ' + JSON.stringify(r));
   });
 });
+
+/* ───────────────────────────── N. Second-pass audit fixes ───────────────────────────── */
+describe('N. Second-pass audit fixes', () => {
+  let s, key, h;
+  before(async () => { s = await startServer({ env: { MAX_QUEUE_SIZE: '1', REDACT_BODIES: 'true' } }); const p = await s.project('t-n'); key = p.api_key; h = { 'X-Api-Key': key }; });
+  after(async () => s.kill());
+
+  it('[N-01] an Idempotency-Key reused with a different payload is a 409, not a silent replay', async () => {
+    const a = await s.req('POST', '/api/v1/messages', { headers: { ...h, 'Idempotency-Key': 'k-conflict' }, body: { message: 'one', recipient: '+919876543210' } });
+    const b = await s.req('POST', '/api/v1/messages', { headers: { ...h, 'Idempotency-Key': 'k-conflict' }, body: { message: 'one', recipient: '+919876500000' } });   // bodies are redacted in this suite, so the recipient is what can be compared
+    const c = await s.req('POST', '/api/v1/messages', { headers: { ...h, 'Idempotency-Key': 'k-conflict' }, body: { message: 'one', recipient: '+919876543210' } });
+    assert.equal(a.status, 202); assert.equal(b.status, 409); assert.equal(b.json.code, 'idempotency_conflict');
+    assert.equal(c.status, 200); assert.equal(c.json.idempotent_replay, true);
+  });
+
+  it('[N-02] a request rejected with 503 queue_full releases its Idempotency-Key so the client retry is really attempted', async () => {
+    await s.ctl('/close?code=428');                       // disconnected → queue stops draining
+    const first = await s.req('POST', '/api/v1/messages', { headers: h, body: { message: 'fills the queue', recipient: '+919876543210' } });
+    const full = await s.req('POST', '/api/v1/messages', { headers: { ...h, 'Idempotency-Key': 'k-full' }, body: { message: 'rejected', recipient: '+919876543210' } });
+    assert.equal(first.status, 202); assert.equal(full.status, 503);
+    for (let i = 0; i < 40; i++) { if ((await s.req('GET', '/api/v1/status')).json.queue_length === 0) break; await sleep(250); }   // reconnect drains
+    const retry = await s.req('POST', '/api/v1/messages', { headers: { ...h, 'Idempotency-Key': 'k-full' }, body: { message: 'rejected', recipient: '+919876543210' } });
+    assert.equal(retry.status, 202, 'retry must be queued, not answered with the old failed row'); assert.notEqual(retry.json.idempotent_replay, true);
+  });
+
+  it('[N-03] admin test send: unknown project → 404, over-long text → 400, and REDACT_BODIES is honoured', async () => {
+    assert.equal((await s.admin('POST', '/admin/messages/test', { message: 'x', recipient: '+919876543210', project_id: 99999 })).status, 404);
+    assert.equal((await s.admin('POST', '/admin/messages/test', { message: 'x'.repeat(5000), recipient: '+919876543210' })).status, 400);
+    const ok = await s.admin('POST', '/admin/messages/test', { message: 'secret text', recipient: '+919876543210' });
+    assert.equal(ok.status, 202);
+    const row = await s.admin('GET', '/admin/messages/' + ok.json.id);
+    assert.equal(row.status, 200); assert.equal(row.json.body, '[redacted]');
+  });
+
+  it('[N-04] repeated query params give a 400, never a 500; unknown message id is 404', async () => {
+    assert.equal((await s.admin('GET', '/admin/messages?q=a&q=b')).status, 400);
+    assert.equal((await s.admin('GET', '/admin/messages?project=a&project=b')).status, 400);
+    assert.equal((await s.admin('GET', '/admin/messages/99999999')).status, 404);
+  });
+
+  it('[N-05] /api/v1/status is rate limited like the other public routes', async () => {
+    const r = await s.req('GET', '/api/v1/status'); assert.ok(r.headers.get('ratelimit-limit') || r.headers.get('ratelimit'), 'expected RateLimit headers');
+  });
+});

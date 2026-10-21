@@ -65,7 +65,7 @@ function createApp() {
         keyGenerator: (req) => `p${req.project.id}`,
         message: limitJson(`Rate limit for ${label} exceeded for this project`),
     });
-    app.use('/api/v1/status', status_1.statusRouter);
+    app.use('/api/v1/status', ipLimiter, status_1.statusRouter);
     app.use('/api/v1/messages', ipLimiter, auth_1.apiKeyAuth, perProject(config_1.config.messagesRatePerMin, 'messages'), messages_1.messagesRouter);
     app.use('/api/v1/otp', ipLimiter, auth_1.apiKeyAuth, perProject(config_1.config.otpRatePerMin, 'OTP'), otp_1.otpRouter);
     app.use('/admin/projects', adminAuth_1.adminKeyAuth, projects_1.projectsRouter);

@@ -17,10 +17,20 @@ function intParam(v, name, def, min, max) {
         throw new http_1.HttpError(400, 'invalid_param', `${name} must be an integer between ${min} and ${max}`);
     return n;
 }
+/** Query params may be repeated (?q=a&q=b → array); reject that instead of crashing with a 500. */
+function oneStr(v, name) {
+    if (v === undefined)
+        return undefined;
+    if (typeof v !== 'string')
+        throw new http_1.HttpError(400, 'invalid_param', `${name} must be a single value`);
+    return v;
+}
 const escLike = (s) => s.replace(/[\\%_]/g, (c) => '\\' + c);
 // GET /admin/messages?project=&status=&q=&limit=&offset=&before_id=
 exports.logsRouter.get('/', (req, res) => {
-    const q = req.query;
+    const raw = req.query;
+    const q = { project: oneStr(raw.project, 'project'), status: oneStr(raw.status, 'status'), q: oneStr(raw.q, 'q'),
+        limit: oneStr(raw.limit, 'limit'), offset: oneStr(raw.offset, 'offset'), before_id: oneStr(raw.before_id, 'before_id') };
     const limit = intParam(q.limit, 'limit', 50, 1, 500);
     const offset = intParam(q.offset, 'offset', 0, 0, 10_000_000);
     const beforeId = q.before_id !== undefined ? intParam(q.before_id, 'before_id', 0, 1, Number.MAX_SAFE_INTEGER) : null;
@@ -63,6 +73,13 @@ exports.logsRouter.get('/stats', (_req, res) => {
         out[r.status] = r.n;
     res.json({ last_24h: out });
 });
+// GET /admin/messages/:id — one message (lets the console poll a specific row instead of guessing it is in the latest page)
+exports.logsRouter.get('/:id', (req, res) => {
+    const m = (0, db_1.getDb)().prepare('SELECT m.*, p.name AS project_name FROM messages m JOIN projects p ON p.id = m.project_id WHERE m.id = ?').get(Number(req.params.id));
+    if (!m)
+        throw new http_1.HttpError(404, 'not_found', 'Message not found');
+    res.json({ ...m, created_at: (0, http_1.isoUtc)(m.created_at), sent_at: (0, http_1.isoUtc)(m.sent_at) });
+});
 // POST /admin/messages/:id/retry — re-queue a failed message (not possible if its body was redacted)
 exports.logsRouter.post('/:id/retry', (req, res) => {
     const db = (0, db_1.getDb)();
@@ -98,19 +115,23 @@ exports.logsRouter.post('/test', (req, res) => {
         throw new http_1.HttpError(400, 'invalid_recipient', `recipient ${p.error}`);
     }
     const text = message.trim();
+    if (text.length > config_1.config.maxMessageLength)
+        throw new http_1.HttpError(400, 'message_too_long', `message must be at most ${config_1.config.maxMessageLength} characters (got ${text.length})`);
     const db = (0, db_1.getDb)();
     let project;
-    if (project_id) {
+    if (project_id !== undefined && project_id !== null && project_id !== '') {
         project = db.prepare('SELECT id, name FROM projects WHERE id = ?').get(Number(project_id));
+        if (!project)
+            throw new http_1.HttpError(404, 'not_found', 'Project not found'); // never silently fall back to a different project
     }
-    if (!project) {
+    else {
         project = db.prepare('SELECT id, name FROM projects ORDER BY id ASC LIMIT 1').get();
     }
     if (!project) {
         throw new http_1.HttpError(400, 'no_project', 'No project found. Please create a project first.');
     }
     const id = db.prepare(`INSERT INTO messages (project_id, recipient, body, status) VALUES (?, ?, ?, 'queued')`)
-        .run(project.id, p.e164, text).lastInsertRowid;
+        .run(project.id, p.e164, config_1.config.redactBodies ? config_1.REDACTED_BODY : text).lastInsertRowid; // honour REDACT_BODIES here too
     try {
         (0, client_1.enqueueMessage)({ messageId: id, recipient: (0, client_1.toJid)(p.digits), body: text });
     }
