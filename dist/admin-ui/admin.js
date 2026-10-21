@@ -363,8 +363,8 @@ PAGES.pair = {
 function stepsHtml(n) { return '<div class="steps" aria-label="Pairing progress">' + ['Phone number', 'Enter code', 'Connected'].map(function (t, i) { var c = i + 1 < n ? 'done' : i + 1 === n ? 'now' : ''; return '<div class="step ' + c + '"' + (c === 'now' ? ' aria-current="step"' : '') + '><i>' + (c === 'done' ? '✓' : i + 1) + '</i><br>' + t + '</div>'; }).join('') + '</div>'; }
 function renderPair(m) {
   var h = head('Pair WhatsApp', 'Link a dedicated WhatsApp number to send messages');
-  if (m === 'connected') h += stepsHtml(4) + '<div class="card"><div class="alert ok">' + ic('check') + '<span><b>WhatsApp is connected.</b> Messages will be delivered normally.</span></div><dl class="dl"><dt>Status</dt><dd>Connected' + (S.last_connected_at ? ' · ' + timeTag(S.last_connected_at) : '') + '</dd><dt>Queue</dt><dd>' + esc(S.queue_length || 0) + ' waiting</dd></dl><p class="hint">To switch to a different number, unlink first, then pair again. Unlinking logs this server out of WhatsApp.</p><div class="mt"><button class="btn d" type="button" data-act="unlink">Unlink this number</button></div></div>';
-  else if (m === 'existing') h += '<div class="card"><div class="alert warn">' + ic('warn') + '<span>' + (S.last_disconnect_code === 401 ? 'WhatsApp logged this device out.' : 'A linked session exists but WhatsApp is <b>' + esc(S.status) + '</b>.') + ' It will reconnect automatically. If it stays disconnected, unlink and pair again.</span></div><button class="btn d" type="button" data-act="unlink">Unlink &amp; start over</button></div>';
+  if (m === 'connected') h += stepsHtml(4) + '<div class="card"><div class="alert ok">' + ic('check') + '<span><b>WhatsApp is connected.</b> Messages will be delivered normally.</span></div><dl class="dl"><dt>Status</dt><dd>Connected' + (S.last_connected_at ? ' · ' + timeTag(S.last_connected_at) : '') + '</dd><dt>Queue</dt><dd>' + esc(S.queue_length || 0) + ' waiting</dd></dl><p class="hint">To switch to a different number, unlink first, then pair again. Unlinking logs this server out of WhatsApp.</p><div class="row mt"><button class="btn gh sm" type="button" data-act="view-conn-log">' + ic('file') + 'View Connection Log</button><button class="btn d sm" type="button" data-act="unlink">Unlink this number</button></div></div>';
+  else if (m === 'existing') h += '<div class="card"><div class="alert warn">' + ic('warn') + '<span>' + (S.last_disconnect_code === 401 ? 'WhatsApp logged this device out.' : 'A linked session exists but WhatsApp is <b>' + esc(S.status) + '</b>.') + ' It will reconnect automatically. If it stays disconnected, unlink and pair again.</span></div><div class="row mt"><button class="btn gh sm" type="button" data-act="view-conn-log">' + ic('file') + 'View Connection Log</button><button class="btn d sm" type="button" data-act="unlink">Unlink &amp; start over</button></div></div>';
   else if (m === 'code') h += stepsHtml(2) + '<div class="card"><p>On your phone open <b>WhatsApp → Settings → Linked devices → Link a device → Link with phone number instead</b>, then enter this code:</p><div class="paircode" id="pc" aria-label="Pairing code">' + esc(P.code) + '</div><div class="row"><button class="btn gh" type="button" data-act="pair-copy">' + ic('copy') + 'Copy code</button><button class="btn gh" type="button" data-act="pair-new">Request a new code</button><button class="btn gh" type="button" data-act="pair-cancel">Use another number</button></div><p class="hint mt" id="pc-age" aria-live="off"></p><p class="hint">This page updates by itself the moment WhatsApp links the device. Codes expire quickly — if WhatsApp rejects it, request a new one.</p></div>';
   else h += stepsHtml(1) + '<div class="card"><div class="fg"><label for="pp">WhatsApp number to link</label><input id="pp" type="tel" inputmode="tel" autocomplete="off" placeholder="919876543210" aria-describedby="pp-h"><div class="hint" id="pp-h">Country code + number. Spaces, + and dashes are fine. Use a dedicated number, not your personal one.</div></div><button class="btn p" id="pair-go" type="button" data-act="pair-go">' + ic('phone') + 'Get pairing code</button><div id="pair-err" aria-live="assertive"></div></div>';
   body(h); tickPair();
@@ -391,6 +391,18 @@ ACT['unlink'] = function (btn) {
     api('POST', '/admin/pair/unlink', {}, { timeout: 20000 }).then(function () { toast('Session removed — you can pair a number now', 'ok'); P.code = null; S.registered = false; S.status = 'disconnected'; P.mode = ''; PAGES.pair.onStatus(); pollNow(); },
       function (e) { toast(e.message, 'bad'); setBusy(btn, false); });
   });
+};
+ACT['view-conn-log'] = function () {
+  api('GET', '/admin/pair/connection-log').then(function (d) {
+    var lines = d.lines || [];
+    dialog({
+      title: 'Connection Event Log (Soak Test)', wide: true, okLabel: 'Close', hideCancel: true,
+      html: '<p class="hint" style="margin-bottom:10px">Live soak test log tracking connection stability, socket recovery, and drops.</p>' +
+        '<div class="code" style="max-height:340px;overflow-y:auto"><pre style="font-size:.78rem;line-height:1.6;color:var(--t1)">' +
+        (lines.length ? esc(lines.join('\n')) : 'No connection events logged yet.') +
+        '</pre></div>'
+    });
+  }, function (e) { toast(e.message, 'bad'); });
 };
 
 /* ═════════════════════════ PROJECTS ═════════════════════════ */
